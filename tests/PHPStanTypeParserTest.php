@@ -31,9 +31,9 @@ use const Typhoon\Type\nullT;
 use const Typhoon\Type\positiveIntT;
 use const Typhoon\Type\resourceT;
 use const Typhoon\Type\scalarT;
+use const Typhoon\Type\stringT;
 use const Typhoon\Type\trueT;
 use const Typhoon\Type\voidT;
-use const Typhoon\Type\stringT;
 
 #[CoversClass(PHPStanTypeParser::class)]
 final class PHPStanTypeParserTest extends TestCase
@@ -77,14 +77,14 @@ final class PHPStanTypeParserTest extends TestCase
         yield '"str"' => stringT('str');
         yield "'str'" => stringT('str');
         yield "'\\n'" => stringT('\n');
-        yield "string" => stringT;
-        yield "non-empty-string" => nonEmptyStringT;
-        yield "resource" => resourceT;
-        yield "array-key" => arrayKeyT;
-        yield "scalar" => scalarT;
-        yield "int|string" => orT(intT, stringT);
-        yield "int&string" => andT(intT, stringT);
-        yield "mixed" => mixedT;
+        yield 'string' => stringT;
+        yield 'non-empty-string' => nonEmptyStringT;
+        yield 'resource' => resourceT;
+        yield 'array-key' => arrayKeyT;
+        yield 'scalar' => scalarT;
+        yield 'int|string' => orT(intT, stringT);
+        yield 'int&string' => andT(intT, stringT);
+        yield 'mixed' => mixedT;
     }
 
     /**
