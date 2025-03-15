@@ -1,0 +1,9 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\Type;
+
+class CallableTypeNode
+{
+	/** @var list<CallableTypeParameterNode> */
+	public $parameters;
+}

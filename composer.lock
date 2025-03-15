@@ -4,8 +4,124 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2235cb8c791e3ab399034051e2f35131",
-    "packages": [],
+    "content-hash": "b7322316000475fcba1150212812a709",
+    "packages": [
+        {
+            "name": "phpstan/phpdoc-parser",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpdoc-parser.git",
+                "reference": "9b30d6fd026b2c132b3985ce6b23bec09ab3aa68"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/9b30d6fd026b2c132b3985ce6b23bec09ab3aa68",
+                "reference": "9b30d6fd026b2c132b3985ce6b23bec09ab3aa68",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "doctrine/annotations": "^2.0",
+                "nikic/php-parser": "^5.3.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "symfony/process": "^5.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PHPStan\\PhpDocParser\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPDoc parser with support for nullable, intersection and generic types",
+            "support": {
+                "issues": "https://github.com/phpstan/phpdoc-parser/issues",
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.1.0"
+            },
+            "time": "2025-02-19T13:28:12+00:00"
+        },
+        {
+            "name": "typhoon/type",
+            "version": "0.5.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/typhoon-php/type.git",
+                "reference": "b7d8d2ecbcd3358a2edc4ddaa8750f68611a4022"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/b7d8d2ecbcd3358a2edc4ddaa8750f68611a4022",
+                "reference": "b7d8d2ecbcd3358a2edc4ddaa8750f68611a4022",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.2",
+                "nette/php-generator": "^4.1.7",
+                "phpunit/phpunit": "^10.5.45",
+                "symfony/finder": "^6.4.17",
+                "symfony/var-dumper": "^6.4.18 || ^7.2.3"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": true,
+                    "target-directory": "tools"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/dereferenceType.php",
+                    "src/types.php"
+                ],
+                "psr-4": {
+                    "Typhoon\\Type\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Valentin Udaltsov",
+                    "email": "udaltsov.valentin@gmail.com"
+                },
+                {
+                    "name": "Typhoon Team",
+                    "homepage": "https://github.com/orgs/typhoon-php/people"
+                }
+            ],
+            "description": "Typhoon Type System",
+            "support": {
+                "issues": "https://github.com/typhoon-php/type/issues",
+                "source": "https://github.com/typhoon-php/type/tree/0.5.x"
+            },
+            "funding": [
+                {
+                    "url": "https://www.tinkoff.ru/cf/5MqZQas2dk7",
+                    "type": "custom"
+                }
+            ],
+            "time": "2025-03-15T18:46:24+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "bamarni/composer-bin-plugin",
@@ -1923,7 +2039,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "typhoon/type": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

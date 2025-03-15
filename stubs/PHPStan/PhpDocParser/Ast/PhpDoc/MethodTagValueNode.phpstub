@@ -1,0 +1,16 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\PhpDoc;
+
+class MethodTagValueNode
+{
+	/**
+	 * @var non-empty-string
+	 */
+	public $methodName;
+
+	/**
+	 * @var list<TemplateTagValueNode>
+	 */
+	public $templateTypes;
+}

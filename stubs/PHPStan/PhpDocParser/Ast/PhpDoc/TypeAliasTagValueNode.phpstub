@@ -1,0 +1,11 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\PhpDoc;
+
+class TypeAliasTagValueNode
+{
+	/**
+	 * @var non-empty-string
+	 */
+	public $alias;
+}

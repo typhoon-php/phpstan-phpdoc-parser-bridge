@@ -1,0 +1,25 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\PhpDoc;
+
+/**
+ * @template TValue of PhpDocTagValueNode
+ */
+class PhpDocTagNode
+{
+	/**
+	 * @var non-empty-string
+	 */
+	public $name;
+
+	/**
+	 * @var TValue
+	 */
+	public $value;
+
+	/**
+	 * @param non-empty-string $name
+	 * @param TValue $value
+	 */
+	public function __construct(string $name, PhpDocTagValueNode $value) {}
+}

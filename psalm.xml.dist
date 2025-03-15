@@ -31,6 +31,7 @@
 
     <plugins>
         <pluginClass class="Typhoon\CheckVisibilityPsalmPlugin\CheckVisibilityPlugin"/>
+        <plugin filename="tools/psalm/src/TyphoonPsalmPlugin.php"/>
     </plugins>
 
     <ignoreExceptions>
@@ -64,4 +65,23 @@
         <function name="sleep"/>
         <function name="usleep"/>
     </forbiddenFunctions>
+
+    <stubs>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstExprArrayItemNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstExprArrayNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstFetchNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/MethodTagValueNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/PhpDocTagNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/PhpDocTagValueNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TemplateTagValueNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TypeAliasImportTagValueNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TypeAliasTagValueNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/CallableTypeNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/CallableTypeParameterNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/GenericTypeNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/IdentifierTypeNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/IntersectionTypeNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/TypeNode.phpstub"/>
+        <file name="stubs/PHPStan/PhpDocParser/Ast/Type/UnionTypeNode.phpstub"/>
+    </stubs>
 </psalm>

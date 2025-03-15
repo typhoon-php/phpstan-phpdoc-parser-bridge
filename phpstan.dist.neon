@@ -10,3 +10,20 @@ parameters:
     editorUrl: ''
     editorUrlTitle: '%%file%%:%%line%%'
     tmpDir: ./var/phpstan
+    stubFiles:
+        - stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstExprArrayItemNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstExprArrayNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/ConstExpr/ConstFetchNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/MethodTagValueNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/PhpDocTagNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/PhpDocTagValueNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TemplateTagValueNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TypeAliasImportTagValueNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/PhpDoc/TypeAliasTagValueNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/CallableTypeNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/CallableTypeParameterNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/GenericTypeNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/IdentifierTypeNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/IntersectionTypeNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/TypeNode.phpstub
+        - stubs/PHPStan/PhpDocParser/Ast/Type/UnionTypeNode.phpstub

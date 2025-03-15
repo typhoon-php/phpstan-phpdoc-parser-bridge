@@ -1,0 +1,9 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\Type;
+
+class IntersectionTypeNode
+{
+	/** @var non-empty-list<TypeNode> */
+	public $types;
+}

@@ -1,0 +1,9 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\ConstExpr;
+
+class ConstExprArrayNode
+{
+	/** @var list<ConstExprArrayItemNode> */
+	public $items;
+}

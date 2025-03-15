@@ -1,0 +1,11 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\ConstExpr;
+
+class ConstFetchNode
+{
+	/**
+	 * @var non-empty-string
+	 */
+	public $name;
+}

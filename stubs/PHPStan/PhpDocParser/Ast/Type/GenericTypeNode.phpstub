@@ -1,0 +1,9 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\Type;
+
+class GenericTypeNode
+{
+	/** @var list<TypeNode> */
+	public $genericTypes;
+}

@@ -1,0 +1,9 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\Type;
+
+class UnionTypeNode
+{
+	/** @var non-empty-list<TypeNode> */
+	public $types;
+}

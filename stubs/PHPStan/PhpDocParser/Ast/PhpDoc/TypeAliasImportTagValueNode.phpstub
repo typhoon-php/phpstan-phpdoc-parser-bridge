@@ -1,0 +1,16 @@
+<?php
+
+namespace PHPStan\PhpDocParser\Ast\PhpDoc;
+
+class TypeAliasImportTagValueNode
+{
+	/**
+	 * @var non-empty-string
+	 */
+	public $importedAlias;
+
+	/**
+	 * @var ?non-empty-string
+	 */
+	public $importedAs;
+}
