@@ -19,6 +19,7 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
+use function Typhoon\Type\diffT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
@@ -120,6 +121,7 @@ final class TypeConverter
                     \count($genericNodes),
                 ))
             },
+            'diff' => diffT($this->convert($genericNodes[0]), $this->convert($genericNodes[1])),
             'string' => stringT,
             'non-empty-string' => nonEmptyStringT,
             'resource' => resourceT,

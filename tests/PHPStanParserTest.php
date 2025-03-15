@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Typhoon\PHPStanPhpDocParserBridge\Internal\TypeConverter;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
+use function Typhoon\Type\diffT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
@@ -87,6 +88,7 @@ final class PHPStanParserTest extends TestCase
         yield 'int|string' => orT(intT, stringT);
         yield 'int&string' => andT(intT, stringT);
         yield 'mixed' => mixedT;
+        yield 'diff<string, "">' => diffT(stringT, stringT(''));
     }
 
     /**
