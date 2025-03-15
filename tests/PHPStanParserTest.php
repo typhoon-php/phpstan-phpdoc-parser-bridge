@@ -7,6 +7,7 @@ namespace Typhoon\PHPStanPhpDocParserBridge;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Typhoon\PHPStanPhpDocParserBridge\Internal\TypeConverter;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\floatRangeT;
@@ -35,8 +36,9 @@ use const Typhoon\Type\stringT;
 use const Typhoon\Type\trueT;
 use const Typhoon\Type\voidT;
 
-#[CoversClass(PHPStanTypeParser::class)]
-final class PHPStanTypeParserTest extends TestCase
+#[CoversClass(PHPStanParser::class)]
+#[CoversClass(TypeConverter::class)]
+final class PHPStanParserTest extends TestCase
 {
     /**
      * @return \Generator<non-empty-string, Type>
@@ -99,17 +101,15 @@ final class PHPStanTypeParserTest extends TestCase
         }
     }
 
+    private ?PHPStanParser $parser = null;
+
     #[DataProvider('provider')]
     public function test(string $string, Type $expectedType): void
     {
         $this->parser ??= new PHPStanParser();
-        $typeNode = $this->parser->parseType($string);
-        $typeParser = new PHPStanTypeParser();
 
-        $type = $typeParser->reflectType($typeNode);
+        $type = $this->parser->parseType($string);
 
         self::assertEquals($expectedType, $type);
     }
-
-    private ?PHPStanParser $parser = null;
 }

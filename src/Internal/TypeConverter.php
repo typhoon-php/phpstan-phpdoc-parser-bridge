@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Typhoon\PHPStanPhpDocParserBridge;
+namespace Typhoon\PHPStanPhpDocParserBridge\Internal;
 
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprFalseNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprFloatNode;
@@ -46,14 +46,15 @@ use const Typhoon\Type\trueT;
 use const Typhoon\Type\voidT;
 
 /**
- * @api
+ * @internal
+ * @psalm-internal Typhoon\PHPStanPhpDocParserBridge
  */
-final class PHPStanTypeParser
+final class TypeConverter
 {
-    public function reflectType(TypeNode $node): Type
+    public function convert(TypeNode $node): Type
     {
         if ($node instanceof NullableTypeNode) {
-            return nullOrT($this->reflectType($node->type));
+            return nullOrT($this->convert($node->type));
         }
 
         if ($node instanceof ConstTypeNode) {
@@ -69,11 +70,11 @@ final class PHPStanTypeParser
         }
 
         if ($node instanceof UnionTypeNode) {
-            return orT(...array_map($this->reflectType(...), $node->types));
+            return orT(...array_map($this->convert(...), $node->types));
         }
 
         if ($node instanceof IntersectionTypeNode) {
-            return andT(...array_map($this->reflectType(...), $node->types));
+            return andT(...array_map($this->convert(...), $node->types));
         }
 
         throw new \LogicException(\sprintf('`%s` is not supported', $node::class));
