@@ -86,7 +86,9 @@ final class PHPStanParserTest extends TestCase
         yield 'array-key' => arrayKeyT;
         yield 'scalar' => scalarT;
         yield 'int|string' => orT(intT, stringT);
+        yield '(int|string)|float' => orT(orT(intT, stringT), floatT);
         yield 'int&string' => andT(intT, stringT);
+        yield '(int&string)&float' => andT(andT(intT, stringT), floatT);
         yield 'mixed' => mixedT;
         yield 'diff<string, "">' => diffT(stringT, stringT(''));
     }
