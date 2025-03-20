@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Typhoon\PHPStanPhpDocParserBridge;
+namespace Typhoon\PHPStanTypeParser;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Typhoon\PHPStanPhpDocParserBridge\Internal\TypeConverter;
+use Typhoon\PHPStanTypeParser\Internal\ContextualTypeParser;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\diffT;
@@ -37,9 +37,9 @@ use const Typhoon\Type\stringT;
 use const Typhoon\Type\trueT;
 use const Typhoon\Type\voidT;
 
-#[CoversClass(PHPStanParser::class)]
-#[CoversClass(TypeConverter::class)]
-final class PHPStanParserTest extends TestCase
+#[CoversClass(PHPStanTypeParser::class)]
+#[CoversClass(ContextualTypeParser::class)]
+final class PHPStanTypeParserTest extends TestCase
 {
     /**
      * @return \Generator<non-empty-string, Type>
@@ -90,7 +90,6 @@ final class PHPStanParserTest extends TestCase
         yield 'int&string' => andT(intT, stringT);
         yield '(int&string)&float' => andT(andT(intT, stringT), floatT);
         yield 'mixed' => mixedT;
-        yield 'diff<string, "">' => diffT(stringT, stringT(''));
     }
 
     /**
@@ -105,14 +104,14 @@ final class PHPStanParserTest extends TestCase
         }
     }
 
-    private ?PHPStanParser $parser = null;
+    private ?PHPStanTypeParser $parser = null;
 
     #[DataProvider('provider')]
     public function test(string $string, Type $expectedType): void
     {
-        $this->parser ??= new PHPStanParser();
+        $this->parser ??= new PHPStanTypeParser();
 
-        $type = $this->parser->parseType($string);
+        $type = $this->parser->parseString($string);
 
         self::assertEquals($expectedType, $type);
     }

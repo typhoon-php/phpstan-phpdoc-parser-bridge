@@ -1,6 +1,6 @@
 {
-    "name": "typhoon/phpstan-phpdoc-parser-bridge",
-    "description": "Typhoon PHPStan PHPDoc Parser Bridge",
+    "name": "typhoon/phpstan-type-parser",
+    "description": "Typhoon PHPStan Type Parser",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -25,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Typhoon\\PHPStanPhpDocParserBridge\\": "src/"
+            "Typhoon\\PHPStanTypeParser\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Typhoon\\PHPStanPhpDocParserBridge\\": "tests/"
+            "Typhoon\\PHPStanTypeParser\\": "tests/"
         }
     },
     "config": {

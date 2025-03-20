@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Typhoon\PHPStanPhpDocParserBridge\Internal;
+namespace Typhoon\PHPStanTypeParser\Internal;
 
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprFalseNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprFloatNode;
@@ -17,9 +17,10 @@ use PHPStan\PhpDocParser\Ast\Type\IntersectionTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use Typhoon\PHPStanTypeParser\CustomTypeParser;
+use Typhoon\PHPStanTypeParser\TypeContext;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
-use function Typhoon\Type\diffT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
@@ -48,34 +49,39 @@ use const Typhoon\Type\voidT;
 
 /**
  * @internal
- * @psalm-internal Typhoon\PHPStanPhpDocParserBridge
+ * @psalm-internal Typhoon\PHPStanTypeParser
  */
-final class TypeConverter
+final class ContextualTypeParser
 {
-    public function convert(TypeNode $node): Type
+    public function __construct(
+        private readonly CustomTypeParser $customTypeParser,
+        private readonly TypeContext $context,
+    ) {}
+
+    public function parseTypeNode(TypeNode $node): Type
     {
         if ($node instanceof NullableTypeNode) {
-            return nullOrT($this->convert($node->type));
+            return nullOrT($this->parseTypeNode($node->type));
         }
 
         if ($node instanceof ConstTypeNode) {
-            return $this->reflectConstExpr($node);
+            return $this->parseConstExpr($node);
         }
 
         if ($node instanceof IdentifierTypeNode) {
-            return $this->reflectIdentifier($node->name);
+            return $this->parseIdentifier($node->name);
         }
 
         if ($node instanceof GenericTypeNode) {
-            return $this->reflectIdentifier($node->type->name, $node->genericTypes);
+            return $this->parseIdentifier($node->type->name, $node->genericTypes);
         }
 
         if ($node instanceof UnionTypeNode) {
-            return orT(...array_map($this->convert(...), $node->types));
+            return orT(...array_map($this->parseTypeNode(...), $node->types));
         }
 
         if ($node instanceof IntersectionTypeNode) {
-            return andT(...array_map($this->convert(...), $node->types));
+            return andT(...array_map($this->parseTypeNode(...), $node->types));
         }
 
         throw new \LogicException(\sprintf('`%s` is not supported', $node::class));
@@ -85,8 +91,10 @@ final class TypeConverter
      * @param non-empty-string $name
      * @param list<TypeNode> $genericNodes
      */
-    private function reflectIdentifier(string $name, array $genericNodes = []): Type
+    private function parseIdentifier(string $name, array $genericNodes = []): Type
     {
+        $typeArguments = fn(): array => array_map($this->parseTypeNode(...), $genericNodes);
+
         return match ($name) {
             'never' => neverT,
             'void' => voidT,
@@ -102,8 +110,8 @@ final class TypeConverter
             'int', 'integer' => match (\count($genericNodes)) {
                 0 => intT,
                 2 => intRangeT(
-                    min: $this->reflectRangeLimit($genericNodes[0], 'min', float: false),
-                    max: $this->reflectRangeLimit($genericNodes[1], 'max', float: false),
+                    min: $this->parseRangeLimit($genericNodes[0], 'min', float: false),
+                    max: $this->parseRangeLimit($genericNodes[1], 'max', float: false),
                 ),
                 default => throw new \LogicException(\sprintf(
                     'int range type should have 2 type arguments, got %d',
@@ -113,22 +121,22 @@ final class TypeConverter
             'float' => match (\count($genericNodes)) {
                 0 => floatT,
                 2 => floatRangeT(
-                    min: $this->reflectRangeLimit($genericNodes[0], 'min', float: true),
-                    max: $this->reflectRangeLimit($genericNodes[1], 'max', float: true),
+                    min: $this->parseRangeLimit($genericNodes[0], 'min', float: true),
+                    max: $this->parseRangeLimit($genericNodes[1], 'max', float: true),
                 ),
                 default => throw new \LogicException(\sprintf(
                     'float range type should have 2 type arguments, got %d',
                     \count($genericNodes),
                 ))
             },
-            'diff' => diffT($this->convert($genericNodes[0]), $this->convert($genericNodes[1])),
             'string' => stringT,
             'non-empty-string' => nonEmptyStringT,
             'resource' => resourceT,
             'array-key' => arrayKeyT,
             'scalar' => scalarT,
             'mixed' => mixedT,
-            default => throw new \LogicException(),
+            default => $this->customTypeParser->parseCustomType($name, $typeArguments(), $this->context)
+                ?? throw new \LogicException(\sprintf('Unknown identifier `%s`', $name)),
         };
     }
 
@@ -136,7 +144,7 @@ final class TypeConverter
      * @param 'min'|'max' $name
      * @return ?numeric-string
      */
-    private function reflectRangeLimit(TypeNode $type, string $name, bool $float): ?string
+    private function parseRangeLimit(TypeNode $type, string $name, bool $float): ?string
     {
         if ($type instanceof IdentifierTypeNode) {
             if ($type->name === $name) {
@@ -163,7 +171,7 @@ final class TypeConverter
         throw new \LogicException();
     }
 
-    private function reflectConstExpr(ConstTypeNode $node): Type
+    private function parseConstExpr(ConstTypeNode $node): Type
     {
         $exprNode = $node->constExpr;
 

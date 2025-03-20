@@ -55,16 +55,16 @@
         },
         {
             "name": "composer-unused/symbol-parser",
-            "version": "0.2.6",
+            "version": "0.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer-unused/symbol-parser.git",
-                "reference": "de4296816dc023d1b932d5ea62536aecc1c51d85"
+                "reference": "7576ca41ca6ebd46b3c4f18d6adb6f1b340bb694"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer-unused/symbol-parser/zipball/de4296816dc023d1b932d5ea62536aecc1c51d85",
-                "reference": "de4296816dc023d1b932d5ea62536aecc1c51d85",
+                "url": "https://api.github.com/repos/composer-unused/symbol-parser/zipball/7576ca41ca6ebd46b3c4f18d6adb6f1b340bb694",
+                "reference": "7576ca41ca6ebd46b3c4f18d6adb6f1b340bb694",
                 "shasum": ""
             },
             "require": {
@@ -122,7 +122,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-03-15T10:27:03+00:00"
+            "time": "2025-03-17T14:27:54+00:00"
         },
         {
             "name": "icanhazstring/composer-unused",
