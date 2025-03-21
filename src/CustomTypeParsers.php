@@ -18,10 +18,10 @@ final class CustomTypeParsers implements CustomTypeParser
         private readonly iterable $customTypeParsers = [],
     ) {}
 
-    public function parseCustomType(string $unresolvedName, array $typeArguments, TypeContext $context): ?Type
+    public function parseCustomType(string $unresolvedName, array $templateArguments, TypeContext $context): ?Type
     {
         foreach ($this->customTypeParsers as $customTypeParser) {
-            $type = $customTypeParser->parseCustomType($unresolvedName, $typeArguments, $context);
+            $type = $customTypeParser->parseCustomType($unresolvedName, $templateArguments, $context);
 
             if ($type !== null) {
                 return $type;

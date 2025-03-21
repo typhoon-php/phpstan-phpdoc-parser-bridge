@@ -13,7 +13,7 @@ interface CustomTypeParser
 {
     /**
      * @param non-empty-string $unresolvedName
-     * @param list<Type> $typeArguments
+     * @param list<Type> $templateArguments
      */
-    public function parseCustomType(string $unresolvedName, array $typeArguments, TypeContext $context): ?Type;
+    public function parseCustomType(string $unresolvedName, array $templateArguments, TypeContext $context): ?Type;
 }

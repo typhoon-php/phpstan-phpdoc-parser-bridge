@@ -25,7 +25,7 @@ interface TypeContext
 
     /**
      * @param non-empty-string $unresolvedName
-     * @param list<Type> $typeArguments
+     * @param list<Type> $templateArguments
      */
-    public function resolveNameAsType(string $unresolvedName, array $typeArguments = []): Type;
+    public function resolveNameAsType(string $unresolvedName, array $templateArguments = []): Type;
 }

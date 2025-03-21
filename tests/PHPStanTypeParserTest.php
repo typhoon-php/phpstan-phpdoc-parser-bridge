@@ -15,6 +15,7 @@ use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
 use function Typhoon\Type\nullOrT;
+use function Typhoon\Type\objectT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
@@ -89,6 +90,9 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'int&string' => andT(intT, stringT);
         yield '(int&string)&float' => andT(andT(intT, stringT), floatT);
         yield 'mixed' => mixedT;
+        yield \stdClass::class => objectT(\stdClass::class);
+        yield \Stringable::class => objectT(\Stringable::class);
+        yield 'Traversable<int, string>' => objectT(\Traversable::class, [intT, stringT]);
     }
 
     /**

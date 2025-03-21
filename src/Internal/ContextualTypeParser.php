@@ -140,14 +140,10 @@ final class ContextualTypeParser
             return $type($genericNodes);
         }
 
-        $typeArguments = array_map($this->parseTypeNode(...), $genericNodes);
-        $customType = $this->customTypeParser->parseCustomType($name, $typeArguments, $this->context);
+        $templateArguments = array_map($this->parseTypeNode(...), $genericNodes);
 
-        if ($customType !== null) {
-            return $customType;
-        }
-
-        throw new \LogicException(\sprintf('Unsupported identifier `%s`', $name));
+        return $this->customTypeParser->parseCustomType($name, $templateArguments, $this->context)
+            ?? $this->context->resolveNameAsType($name, $templateArguments);
     }
 
     /**

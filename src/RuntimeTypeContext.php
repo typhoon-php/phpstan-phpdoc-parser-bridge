@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Typhoon\PHPStanTypeParser;
 
-use Typhoon\Type\NamedObjectT;
 use Typhoon\Type\Type;
+use function Typhoon\Type\objectT;
 
 /**
  * @api
@@ -23,19 +23,15 @@ final class RuntimeTypeContext implements TypeContext
 
     public function resolveClassName(string $unresolvedName): string
     {
-        if (class_exists($unresolvedName)) {
+        if (class_exists($unresolvedName) || interface_exists($unresolvedName)) {
             return $unresolvedName;
         }
 
         throw new \LogicException(\sprintf('Class `%s` does not exist', $unresolvedName));
     }
 
-    public function resolveNameAsType(string $unresolvedName, array $typeArguments = []): Type
+    public function resolveNameAsType(string $unresolvedName, array $templateArguments = []): Type
     {
-        /**
-         * @todo requires objectT() type constructor
-         * @psalm-suppress InternalMethod
-         */
-        return new NamedObjectT($this->resolveClassName($unresolvedName), $typeArguments);
+        return objectT($this->resolveClassName($unresolvedName), $templateArguments);
     }
 }
