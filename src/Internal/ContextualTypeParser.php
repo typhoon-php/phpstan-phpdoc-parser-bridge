@@ -40,7 +40,10 @@ use const Typhoon\Type\neverT;
 use const Typhoon\Type\nonEmptyStringT;
 use const Typhoon\Type\nonNegativeIntT;
 use const Typhoon\Type\nonPositiveIntT;
+use const Typhoon\Type\nonZeroIntT;
 use const Typhoon\Type\nullT;
+use const Typhoon\Type\numericStringT;
+use const Typhoon\Type\numericT;
 use const Typhoon\Type\positiveIntT;
 use const Typhoon\Type\resourceT;
 use const Typhoon\Type\scalarT;
@@ -116,12 +119,14 @@ final class ContextualTypeParser
             'negative-int' => negativeIntT,
             'non-negative-int' => nonNegativeIntT,
             'non-positive-int' => nonPositiveIntT,
-            'non-zero-int' => orT(negativeIntT, positiveIntT),
+            'non-zero-int' => nonZeroIntT,
             'float' => self::parseFloat(...),
-            'string' => stringT,
             'non-empty-string' => nonEmptyStringT,
+            'numeric-string' => numericStringT,
+            'string' => stringT,
             'resource' => resourceT,
             'array-key' => arrayKeyT,
+            'numeric' => numericT,
             'scalar' => scalarT,
             'mixed' => mixedT,
         ];
