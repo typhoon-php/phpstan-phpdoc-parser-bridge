@@ -23,6 +23,7 @@ use const Typhoon\Type\boolT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
+use const Typhoon\Type\lowercaseStringT;
 use const Typhoon\Type\mixedT;
 use const Typhoon\Type\negativeIntT;
 use const Typhoon\Type\neverT;
@@ -85,6 +86,7 @@ final class PHPStanTypeParserTest extends TestCase
         yield "'\\n'" => stringT('\n');
         yield 'non-empty-string' => nonEmptyStringT;
         yield 'numeric-string' => numericStringT;
+        yield 'lowercase-string' => lowercaseStringT;
         yield 'string' => stringT;
         yield 'resource' => resourceT;
         yield 'array-key' => arrayKeyT;
@@ -98,6 +100,7 @@ final class PHPStanTypeParserTest extends TestCase
         yield \stdClass::class => objectT(\stdClass::class);
         yield \Stringable::class => objectT(\Stringable::class);
         yield 'Traversable<int, string>' => objectT(\Traversable::class, [intT, stringT]);
+        // todo yield 'stdClass|Iterator&Throwable' https://github.com/phpstan/phpdoc-parser/issues/271
     }
 
     /**

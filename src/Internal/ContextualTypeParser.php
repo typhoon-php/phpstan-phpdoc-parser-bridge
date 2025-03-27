@@ -34,6 +34,7 @@ use const Typhoon\Type\boolT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
+use const Typhoon\Type\lowercaseStringT;
 use const Typhoon\Type\mixedT;
 use const Typhoon\Type\negativeIntT;
 use const Typhoon\Type\neverT;
@@ -122,6 +123,7 @@ final class ContextualTypeParser
             'non-zero-int' => nonZeroIntT,
             'float' => self::parseFloat(...),
             'non-empty-string' => nonEmptyStringT,
+            'lowercase-string' => lowercaseStringT,
             'numeric-string' => numericStringT,
             'string' => stringT,
             'resource' => resourceT,
