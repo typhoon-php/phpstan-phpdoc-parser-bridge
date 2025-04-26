@@ -59,12 +59,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "7f314b0602235ebbcccaca26fe6dec0832190bf9"
+                "reference": "f44b3bc7301fa3932b66ad998a28371e944696e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/7f314b0602235ebbcccaca26fe6dec0832190bf9",
-                "reference": "7f314b0602235ebbcccaca26fe6dec0832190bf9",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/f44b3bc7301fa3932b66ad998a28371e944696e4",
+                "reference": "f44b3bc7301fa3932b66ad998a28371e944696e4",
                 "shasum": ""
             },
             "require": {
@@ -121,7 +121,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-04-13T15:08:57+00:00"
+            "time": "2025-04-26T12:39:03+00:00"
         }
     ],
     "packages-dev": [
