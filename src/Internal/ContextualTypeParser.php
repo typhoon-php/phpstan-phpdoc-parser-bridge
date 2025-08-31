@@ -22,6 +22,7 @@ use Typhoon\PHPStanTypeParser\CustomTypeParser;
 use Typhoon\PHPStanTypeParser\TypeContext;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
+use function Typhoon\Type\arrayT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
@@ -30,6 +31,7 @@ use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
+use const Typhoon\Type\arrayT;
 use const Typhoon\Type\boolT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
@@ -58,11 +60,6 @@ use const Typhoon\Type\voidT;
  */
 final class ContextualTypeParser
 {
-    /**
-     * @var ?non-empty-array<non-empty-string, Type|\Closure(list<TypeNode>): Type>
-     */
-    private static ?array $identifierMap = null;
-
     public function __construct(
         private readonly CustomTypeParser $customTypeParser,
         private readonly TypeContext $context,
@@ -106,22 +103,18 @@ final class ContextualTypeParser
      */
     private function parseIdentifier(string $name, array $genericNodes = []): Type
     {
-        self::$identifierMap ??= [
+        $atomic = match ($name) {
             'never' => neverT,
             'void' => voidT,
             'null' => nullT,
             'false' => falseT,
             'true' => trueT,
-            'bool' => boolT,
-            'boolean' => boolT,
-            'int' => self::parseInt(...),
-            'integer' => self::parseInt(...),
+            'bool', 'boolean' => boolT,
             'positive-int' => positiveIntT,
             'negative-int' => negativeIntT,
             'non-negative-int' => nonNegativeIntT,
             'non-positive-int' => nonPositiveIntT,
             'non-zero-int' => nonZeroIntT,
-            'float' => self::parseFloat(...),
             'non-empty-string' => nonEmptyStringT,
             'lowercase-string' => lowercaseStringT,
             'numeric-string' => numericStringT,
@@ -131,23 +124,35 @@ final class ContextualTypeParser
             'numeric' => numericT,
             'scalar' => scalarT,
             'mixed' => mixedT,
-        ];
+            default => null,
+        };
 
-        $type = self::$identifierMap[$name] ?? null;
-
-        if ($type instanceof Type) {
+        if ($atomic !== null) {
             if ($genericNodes !== []) {
                 throw new \LogicException();
             }
 
-            return $type;
+            return $atomic;
         }
 
-        if ($type instanceof \Closure) {
-            return $type($genericNodes);
+        if ($name === 'int' || $name === 'integer') {
+            return $this->parseInt($genericNodes);
+        }
+
+        if ($name === 'float') {
+            return $this->parseFloat($genericNodes);
         }
 
         $templateArguments = array_map($this->parseTypeNode(...), $genericNodes);
+
+        if ($name === 'array') {
+            return match ($number = \count($templateArguments)) {
+                0 => arrayT,
+                1 => arrayT(valueType: $templateArguments[0]),
+                2 => arrayT($templateArguments[0], $templateArguments[1]),
+                default => throw new \LogicException(\sprintf('array type should have at most 2 type arguments, got %d', $number)),
+            };
+        }
 
         return $this->customTypeParser->parseCustomType($name, $templateArguments, $this->context)
             ?? $this->context->resolveNameAsType($name, $templateArguments);
@@ -156,7 +161,7 @@ final class ContextualTypeParser
     /**
      * @param list<TypeNode> $genericNodes
      */
-    private static function parseInt(array $genericNodes): Type
+    private function parseInt(array $genericNodes): Type
     {
         return match (\count($genericNodes)) {
             0 => intT,
@@ -174,7 +179,7 @@ final class ContextualTypeParser
     /**
      * @param list<TypeNode> $genericNodes
      */
-    private static function parseFloat(array $genericNodes): Type
+    private function parseFloat(array $genericNodes): Type
     {
         return match (\count($genericNodes)) {
             0 => floatT,
@@ -193,7 +198,7 @@ final class ContextualTypeParser
      * @param 'min'|'max' $name
      * @return ?numeric-string
      */
-    private static function parseRangeLimit(TypeNode $type, string $name, bool $float): ?string
+    private function parseRangeLimit(TypeNode $type, string $name, bool $float): ?string
     {
         if ($type instanceof IdentifierTypeNode) {
             if ($type->name === $name) {
