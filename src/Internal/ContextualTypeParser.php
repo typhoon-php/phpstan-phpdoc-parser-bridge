@@ -27,6 +27,7 @@ use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
+use function Typhoon\Type\nonEmptyArrayT;
 use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
@@ -151,6 +152,15 @@ final class ContextualTypeParser
                 1 => arrayT(valueType: $templateArguments[0]),
                 2 => arrayT($templateArguments[0], $templateArguments[1]),
                 default => throw new \LogicException(\sprintf('array type should have at most 2 type arguments, got %d', $number)),
+            };
+        }
+
+        if ($name === 'non-empty-array') {
+            return match ($number = \count($templateArguments)) {
+                0 => nonEmptyArrayT(),
+                1 => nonEmptyArrayT(valueType: $templateArguments[0]),
+                2 => nonEmptyArrayT($templateArguments[0], $templateArguments[1]),
+                default => throw new \LogicException(\sprintf('non-empty-array type should have at most 2 type arguments, got %d', $number)),
             };
         }
 

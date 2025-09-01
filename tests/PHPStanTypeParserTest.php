@@ -15,6 +15,7 @@ use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
+use function Typhoon\Type\nonEmptyArrayT;
 use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\objectT;
 use function Typhoon\Type\orT;
@@ -101,6 +102,9 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'array' => arrayT;
         yield 'array<string>' => arrayT(valueType: stringT);
         yield 'array<int, string>' => arrayT(intT, stringT);
+        yield 'non-empty-array' => nonEmptyArrayT();
+        yield 'non-empty-array<string>' => nonEmptyArrayT(valueType: stringT);
+        yield 'non-empty-array<int, string>' => nonEmptyArrayT(intT, stringT);
         yield 'mixed' => mixedT;
         yield \stdClass::class => objectT(\stdClass::class);
         yield \Stringable::class => objectT(\Stringable::class);
