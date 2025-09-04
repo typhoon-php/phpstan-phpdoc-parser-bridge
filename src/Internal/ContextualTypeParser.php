@@ -20,6 +20,7 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use Typhoon\PHPStanTypeParser\CustomTypeParser;
 use Typhoon\PHPStanTypeParser\TypeContext;
+use Typhoon\Type\ObjectT;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\arrayT;
@@ -124,6 +125,7 @@ final class ContextualTypeParser
             'array-key' => arrayKeyT,
             'numeric' => numericT,
             'scalar' => scalarT,
+            'object' => new ObjectT([]),
             'mixed' => mixedT,
             default => null,
         };
