@@ -26,22 +26,26 @@ use const Typhoon\Type\boolT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
+use const Typhoon\Type\literalStringT;
 use const Typhoon\Type\lowercaseStringT;
 use const Typhoon\Type\mixedT;
 use const Typhoon\Type\negativeIntT;
 use const Typhoon\Type\neverT;
 use const Typhoon\Type\nonEmptyStringT;
+use const Typhoon\Type\nonFalsyStringT;
 use const Typhoon\Type\nonNegativeIntT;
 use const Typhoon\Type\nonPositiveIntT;
 use const Typhoon\Type\nonZeroIntT;
 use const Typhoon\Type\nullT;
 use const Typhoon\Type\numericStringT;
 use const Typhoon\Type\numericT;
+use const Typhoon\Type\objectT;
 use const Typhoon\Type\positiveIntT;
 use const Typhoon\Type\resourceT;
 use const Typhoon\Type\scalarT;
 use const Typhoon\Type\stringT;
 use const Typhoon\Type\trueT;
+use const Typhoon\Type\truthyStringT;
 use const Typhoon\Type\voidT;
 
 #[CoversClass(PHPStanTypeParser::class)]
@@ -90,6 +94,9 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'non-empty-string' => nonEmptyStringT;
         yield 'numeric-string' => numericStringT;
         yield 'lowercase-string' => lowercaseStringT;
+        yield 'literal-string' => literalStringT;
+        yield 'truthy-string' => truthyStringT;
+        yield 'non-falsy-string' => nonFalsyStringT;
         yield 'string' => stringT;
         yield 'resource' => resourceT;
         yield 'array-key' => arrayKeyT;
@@ -105,6 +112,7 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'non-empty-array' => nonEmptyArrayT();
         yield 'non-empty-array<string>' => nonEmptyArrayT(value: stringT);
         yield 'non-empty-array<int, string>' => nonEmptyArrayT(intT, stringT);
+        yield 'object' => objectT;
         yield 'mixed' => mixedT;
         yield \stdClass::class => namedObjectT(\stdClass::class);
         yield \Stringable::class => namedObjectT(\Stringable::class);
