@@ -92,7 +92,7 @@ final class ParserTest extends TestCase
         yield '0.5' => floatT(0.5);
         yield '-4.67' => floatT(-4.67);
         yield 'float' => floatT;
-        yield 'float<10.0002, 231.00002>' => floatRangeT(10.000_2, 231.000_02);
+        yield 'float<10.0002, 231.00002>' => floatRangeT(10.0002, 231.00002);
         yield 'float<min, 123>' => floatRangeT(max: 123);
         yield 'float<-99, max>' => floatRangeT(min: -99);
         yield '"0"' => stringT('0');
