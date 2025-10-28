@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Typhoon\PHPStanTypeParser;
 
 use Typhoon\Type\Type;
-use function Typhoon\Type\objectT;
+use function Typhoon\Type\namedObjectT;
 
 /**
  * @api
  */
-final class RuntimeTypeContext implements TypeContext
+final readonly class RuntimeTypeContext implements TypeContext
 {
     public function resolveConstantName(string $unresolvedName): array
     {
@@ -32,6 +32,6 @@ final class RuntimeTypeContext implements TypeContext
 
     public function resolveNameAsType(string $unresolvedName, array $templateArguments = []): Type
     {
-        return objectT($this->resolveClassName($unresolvedName), $templateArguments);
+        return namedObjectT($this->resolveClassName($unresolvedName), $templateArguments);
     }
 }

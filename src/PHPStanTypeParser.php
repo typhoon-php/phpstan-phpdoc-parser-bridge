@@ -16,17 +16,17 @@ use Typhoon\Type\Type;
 /**
  * @api
  */
-final class PHPStanTypeParser
+final readonly class PHPStanTypeParser
 {
-    private readonly CustomTypeParser $customTypeParser;
+    private CustomTypeParser $customTypeParser;
 
     /**
      * @param iterable<CustomTypeParser> $customTypeParsers
      */
     public function __construct(
         iterable $customTypeParsers = [],
-        private readonly Lexer $lexer = new Lexer(new ParserConfig([])),
-        private readonly TypeParser $typeParser = new TypeParser(
+        private Lexer $lexer = new Lexer(new ParserConfig([])),
+        private TypeParser $typeParser = new TypeParser(
             new ParserConfig([]),
             new ConstExprParser(new ParserConfig([])),
         ),

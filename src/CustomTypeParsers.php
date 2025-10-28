@@ -9,13 +9,13 @@ use Typhoon\Type\Type;
 /**
  * @api
  */
-final class CustomTypeParsers implements CustomTypeParser
+final readonly class CustomTypeParsers implements CustomTypeParser
 {
     /**
      * @param iterable<CustomTypeParser> $customTypeParsers
      */
     public function __construct(
-        private readonly iterable $customTypeParsers = [],
+        private iterable $customTypeParsers = [],
     ) {}
 
     public function parseCustomType(string $unresolvedName, array $templateArguments, TypeContext $context): ?Type

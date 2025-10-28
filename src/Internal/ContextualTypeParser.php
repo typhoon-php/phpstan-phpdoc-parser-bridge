@@ -20,15 +20,14 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use Typhoon\PHPStanTypeParser\CustomTypeParser;
 use Typhoon\PHPStanTypeParser\TypeContext;
+use Typhoon\Type\ArrayT;
 use Typhoon\Type\ObjectT;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
-use function Typhoon\Type\arrayT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
-use function Typhoon\Type\nonEmptyArrayT;
 use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
@@ -60,11 +59,11 @@ use const Typhoon\Type\voidT;
  * @internal
  * @psalm-internal Typhoon\PHPStanTypeParser
  */
-final class ContextualTypeParser
+final readonly class ContextualTypeParser
 {
     public function __construct(
-        private readonly CustomTypeParser $customTypeParser,
-        private readonly TypeContext $context,
+        private CustomTypeParser $customTypeParser,
+        private TypeContext $context,
     ) {}
 
     public function parseTypeNode(TypeNode $node): Type
@@ -87,7 +86,7 @@ final class ContextualTypeParser
             $node instanceof ConstExprFalseNode => falseT,
             $node instanceof ConstExprTrueNode => trueT,
             $node instanceof ConstExprIntegerNode => match (true) {
-                is_numeric($node->value) => intT($node->value),
+                is_numeric($node->value) => intT((int) $node->value),
                 default => throw new \LogicException(),
             },
             $node instanceof ConstExprFloatNode => match (true) {
@@ -151,17 +150,17 @@ final class ContextualTypeParser
         if ($name === 'array') {
             return match ($number = \count($templateArguments)) {
                 0 => arrayT,
-                1 => arrayT(valueType: $templateArguments[0]),
-                2 => arrayT($templateArguments[0], $templateArguments[1]),
+                1 => new ArrayT(valueType: $templateArguments[0]),
+                2 => new ArrayT($templateArguments[0], $templateArguments[1]),
                 default => throw new \LogicException(\sprintf('array type should have at most 2 type arguments, got %d', $number)),
             };
         }
 
         if ($name === 'non-empty-array') {
             return match ($number = \count($templateArguments)) {
-                0 => nonEmptyArrayT(),
-                1 => nonEmptyArrayT(valueType: $templateArguments[0]),
-                2 => nonEmptyArrayT($templateArguments[0], $templateArguments[1]),
+                0 => new ArrayT(isNonEmpty: true),
+                1 => new ArrayT(valueType: $templateArguments[0], isNonEmpty: true),
+                2 => new ArrayT($templateArguments[0], $templateArguments[1], isNonEmpty: true),
                 default => throw new \LogicException(\sprintf('non-empty-array type should have at most 2 type arguments, got %d', $number)),
             };
         }
@@ -178,8 +177,8 @@ final class ContextualTypeParser
         return match (\count($genericNodes)) {
             0 => intT,
             2 => intRangeT(
-                min: self::parseRangeLimit($genericNodes[0], 'min', float: false),
-                max: self::parseRangeLimit($genericNodes[1], 'max', float: false),
+                min: self::parseIntRangeLimit($genericNodes[0], 'min'),
+                max: self::parseIntRangeLimit($genericNodes[1], 'max'),
             ),
             default => throw new \LogicException(\sprintf(
                 'Int range type should have 2 type arguments, got %d',
@@ -196,8 +195,8 @@ final class ContextualTypeParser
         return match (\count($genericNodes)) {
             0 => floatT,
             2 => floatRangeT(
-                min: self::parseRangeLimit($genericNodes[0], 'min', float: true),
-                max: self::parseRangeLimit($genericNodes[1], 'max', float: true),
+                min: self::parseFloatRangeLimit($genericNodes[0], 'min'),
+                max: self::parseFloatRangeLimit($genericNodes[1], 'max'),
             ),
             default => throw new \LogicException(\sprintf(
                 'Float range type should have 2 type arguments, got %d',
@@ -208,9 +207,8 @@ final class ContextualTypeParser
 
     /**
      * @param 'min'|'max' $name
-     * @return ?numeric-string
      */
-    private function parseRangeLimit(TypeNode $type, string $name, bool $float): ?string
+    private function parseIntRangeLimit(TypeNode $type, string $name): ?int
     {
         if ($type instanceof IdentifierTypeNode) {
             if ($type->name === $name) {
@@ -226,11 +224,34 @@ final class ContextualTypeParser
 
         $expr = $type->constExpr;
 
-        if (($float && $expr instanceof ConstExprFloatNode) || $expr instanceof ConstExprIntegerNode) {
-            if (!is_numeric($expr->value)) {
-                throw new \LogicException();
+        if ($expr instanceof ConstExprIntegerNode && is_numeric($expr->value)) {
+            return (int) $expr->value;
+        }
+
+        throw new \LogicException();
+    }
+
+    /**
+     * @param 'min'|'max' $name
+     * @return ?numeric-string
+     */
+    private function parseFloatRangeLimit(TypeNode $type, string $name): ?string
+    {
+        if ($type instanceof IdentifierTypeNode) {
+            if ($type->name === $name) {
+                return null;
             }
 
+            throw new \LogicException();
+        }
+
+        if (!$type instanceof ConstTypeNode) {
+            throw new \LogicException();
+        }
+
+        $expr = $type->constExpr;
+
+        if (($expr instanceof ConstExprFloatNode || $expr instanceof ConstExprIntegerNode) && is_numeric($expr->value)) {
             return $expr->value;
         }
 

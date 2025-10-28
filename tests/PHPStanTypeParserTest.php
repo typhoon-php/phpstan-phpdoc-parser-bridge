@@ -15,9 +15,9 @@ use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
+use function Typhoon\Type\namedObjectT;
 use function Typhoon\Type\nonEmptyArrayT;
 use function Typhoon\Type\nullOrT;
-use function Typhoon\Type\objectT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
@@ -79,7 +79,7 @@ final class PHPStanTypeParserTest extends TestCase
         yield '0.5' => floatT(0.5);
         yield '-4.67' => floatT(-4.67);
         yield 'float' => floatT;
-        yield 'float<10.0002, 231.00002>' => floatRangeT(10.0002, 231.00002);
+        yield 'float<10.0002, 231.00002>' => floatRangeT(10.000_2, 231.000_02);
         yield 'float<min, 123>' => floatRangeT(max: 123);
         yield 'float<-99, max>' => floatRangeT(min: -99);
         yield '"0"' => stringT('0');
@@ -100,33 +100,21 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'int&string' => andT(intT, stringT);
         yield '(int&string)&float' => andT(andT(intT, stringT), floatT);
         yield 'array' => arrayT;
-        yield 'array<string>' => arrayT(valueType: stringT);
+        yield 'array<string>' => arrayT(value: stringT);
         yield 'array<int, string>' => arrayT(intT, stringT);
         yield 'non-empty-array' => nonEmptyArrayT();
-        yield 'non-empty-array<string>' => nonEmptyArrayT(valueType: stringT);
+        yield 'non-empty-array<string>' => nonEmptyArrayT(value: stringT);
         yield 'non-empty-array<int, string>' => nonEmptyArrayT(intT, stringT);
         yield 'mixed' => mixedT;
-        yield \stdClass::class => objectT(\stdClass::class);
-        yield \Stringable::class => objectT(\Stringable::class);
-        yield 'Traversable<int, string>' => objectT(\Traversable::class, [intT, stringT]);
+        yield \stdClass::class => namedObjectT(\stdClass::class);
+        yield \Stringable::class => namedObjectT(\Stringable::class);
+        yield 'Traversable<int, string>' => namedObjectT(\Traversable::class, [intT, stringT]);
         // todo yield 'stdClass|Iterator&Throwable' https://github.com/phpstan/phpdoc-parser/issues/271
-    }
-
-    /**
-     * @return \Generator<non-empty-string, array{non-empty-string, Type}>
-     */
-    public static function provider(): \Generator
-    {
-        foreach (self::cases() as $string => $type) {
-            $name = is_numeric($string) ? "`{$string}`" : $string;
-
-            yield $name => [$string, $type];
-        }
     }
 
     private ?PHPStanTypeParser $parser = null;
 
-    #[DataProvider('provider')]
+    #[DataProvider('provideCases')]
     public function test(string $string, Type $expectedType): void
     {
         $this->parser ??= new PHPStanTypeParser();
@@ -134,5 +122,17 @@ final class PHPStanTypeParserTest extends TestCase
         $type = $this->parser->parseString($string);
 
         self::assertEquals($expectedType, $type);
+    }
+
+    /**
+     * @return \Generator<non-empty-string, array{non-empty-string, Type}>
+     */
+    public static function provideCases(): iterable
+    {
+        foreach (self::cases() as $string => $type) {
+            $name = is_numeric($string) ? "`{$string}`" : $string;
+
+            yield $name => [$string, $type];
+        }
     }
 }
