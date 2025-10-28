@@ -71,7 +71,7 @@ final class ContextualTypeParser
     {
         return match (true) {
             $node instanceof NullableTypeNode => nullOrT($this->parseTypeNode($node->type)),
-            $node instanceof ConstTypeNode => $this->parseConstExpr($node->constExpr),
+            $node instanceof ConstTypeNode => self::parseConstExpr($node->constExpr),
             $node instanceof IdentifierTypeNode => $this->parseIdentifier($node->name),
             $node instanceof GenericTypeNode => $this->parseIdentifier($node->type->name, $node->genericTypes),
             $node instanceof UnionTypeNode => orT(...array_map($this->parseTypeNode(...), $node->types)),
