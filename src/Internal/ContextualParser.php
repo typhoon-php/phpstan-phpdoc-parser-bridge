@@ -11,32 +11,46 @@ use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNullNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprTrueNode;
+use PHPStan\PhpDocParser\Ast\ConstExpr\ConstFetchNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ConstTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IntersectionTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\OffsetAccessTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use Typhoon\PHPStanTypeParser\CustomTypeParser;
-use Typhoon\PHPStanTypeParser\TypeContext;
+use Typhoon\PHPStanTypeParser\Context;
+use Typhoon\PHPStanTypeParser\CustomParser;
 use Typhoon\Type\ArrayDefaultT;
 use Typhoon\Type\ArrayT;
+use Typhoon\Type\IterableDefaultT;
+use Typhoon\Type\IterableT;
+use Typhoon\Type\ListT;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
+use function Typhoon\Type\arrayT;
+use function Typhoon\Type\classConstantMaskT;
+use function Typhoon\Type\classConstantT;
+use function Typhoon\Type\constantT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
 use function Typhoon\Type\nullOrT;
+use function Typhoon\Type\offsetT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
 use const Typhoon\Type\arrayT;
 use const Typhoon\Type\boolT;
+use const Typhoon\Type\callableT;
+use const Typhoon\Type\closureT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
+use const Typhoon\Type\iterableT;
 use const Typhoon\Type\literalStringT;
 use const Typhoon\Type\lowercaseStringT;
 use const Typhoon\Type\mixedT;
@@ -62,27 +76,30 @@ use const Typhoon\Type\voidT;
  * @internal
  * @psalm-internal Typhoon\PHPStanTypeParser
  */
-final readonly class ContextualTypeParser
+final readonly class ContextualParser
 {
     public function __construct(
-        private CustomTypeParser $customTypeParser,
-        private TypeContext $context,
+        private CustomParser $customTypeParser,
+        private Context $context,
     ) {}
 
-    public function parseTypeNode(TypeNode $node): Type
+    public function parse(TypeNode $node): Type
     {
-        return match (true) {
-            $node instanceof NullableTypeNode => nullOrT($this->parseTypeNode($node->type)),
-            $node instanceof ConstTypeNode => self::parseConstExpr($node->constExpr),
-            $node instanceof IdentifierTypeNode => $this->parseIdentifier($node->name),
-            $node instanceof GenericTypeNode => $this->parseIdentifier($node->type->name, $node->genericTypes),
-            $node instanceof UnionTypeNode => orT(...array_map($this->parseTypeNode(...), $node->types)),
-            $node instanceof IntersectionTypeNode => andT(...array_map($this->parseTypeNode(...), $node->types)),
-            default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
-        };
+        return $this->customTypeParser->parse($node, $this->parse(...), $this->context)
+            ?? match (true) {
+                $node instanceof NullableTypeNode => nullOrT($this->parse($node->type)),
+                $node instanceof ConstTypeNode => $this->parseConstExpr($node->constExpr),
+                $node instanceof IdentifierTypeNode => $this->identifier($node->name),
+                $node instanceof GenericTypeNode => $this->identifier($node->type->name, $node->genericTypes),
+                $node instanceof UnionTypeNode => orT(...array_map($this->parse(...), $node->types)),
+                $node instanceof IntersectionTypeNode => andT(...array_map($this->parse(...), $node->types)),
+                $node instanceof ArrayTypeNode => arrayT(value: $this->parse($node->type)),
+                $node instanceof OffsetAccessTypeNode => offsetT($this->parse($node->type), $this->parse($node->offset)),
+                default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
+            };
     }
 
-    private static function parseConstExpr(ConstExprNode $node): Type
+    private function parseConstExpr(ConstExprNode $node): Type
     {
         return match (true) {
             $node instanceof ConstExprNullNode => nullT,
@@ -97,17 +114,37 @@ final readonly class ContextualTypeParser
                 default => throw new \LogicException(),
             },
             $node instanceof ConstExprStringNode => stringT($node->value),
+            $node instanceof ConstFetchNode => $this->constantFetch($node),
             default => throw new \LogicException(\sprintf('PhpDoc node %s is not supported', $node::class)),
         };
+    }
+
+    private function constantFetch(ConstFetchNode $node): Type
+    {
+        if ($node->className === '') {
+            return constantT($node->name);
+        }
+
+        $class = $this->context->resolveClassName($node->className);
+
+        if ($node->name === 'class') {
+            return stringT($class);
+        }
+
+        if (str_contains($node->name, '*')) {
+            return classConstantMaskT($class, $node->name);
+        }
+
+        return classConstantT($class, $node->name);
     }
 
     /**
      * @param non-empty-string $name
      * @param list<TypeNode> $genericNodes
      */
-    private function parseIdentifier(string $name, array $genericNodes = []): Type
+    private function identifier(string $name, array $genericNodes = []): Type
     {
-        $atomic = match ($name) {
+        $singleton = match ($name) {
             'never' => neverT,
             'void' => voidT,
             'null' => nullT,
@@ -130,46 +167,55 @@ final readonly class ContextualTypeParser
             'numeric' => numericT,
             'scalar' => scalarT,
             'object' => objectT,
+            'Closure' => closureT,
+            'callable' => callableT,
             'mixed' => mixedT,
             default => null,
         };
 
-        if ($atomic !== null) {
+        if ($singleton !== null) {
             if ($genericNodes !== []) {
                 throw new \LogicException();
             }
 
-            return $atomic;
+            return $singleton;
         }
 
         if ($name === 'int' || $name === 'integer') {
-            return $this->parseInt($genericNodes);
+            return $this->int($genericNodes);
         }
 
-        if ($name === 'float') {
-            return $this->parseFloat($genericNodes);
+        if ($name === 'float' || $name === 'double') {
+            return $this->float($genericNodes);
         }
 
-        $templateArguments = array_map($this->parseTypeNode(...), $genericNodes);
+        $templateArguments = array_map($this->parse(...), $genericNodes);
+
+        if ($name === 'list' || $name === 'non-empty-list') {
+            return $this->list($templateArguments, isNonEmpty: $name === 'non-empty-list');
+        }
 
         if ($name === 'array' || $name === 'non-empty-array') {
-            return $this->parseArray($templateArguments, isNonEmpty: $name === 'non-empty-array');
+            return $this->array($templateArguments, isNonEmpty: $name === 'non-empty-array');
         }
 
-        return $this->customTypeParser->parseCustomType($name, $templateArguments, $this->context)
-            ?? $this->context->resolveNameAsType($name, $templateArguments);
+        if ($name === 'iterable') {
+            return $this->iterable($templateArguments);
+        }
+
+        return $this->context->resolveNameAsType($name, $templateArguments);
     }
 
     /**
      * @param list<TypeNode> $genericNodes
      */
-    private function parseInt(array $genericNodes): Type
+    private function int(array $genericNodes): Type
     {
         return match (\count($genericNodes)) {
             0 => intT,
             2 => intRangeT(
-                min: self::parseIntRangeLimit($genericNodes[0], 'min'),
-                max: self::parseIntRangeLimit($genericNodes[1], 'max'),
+                min: self::intRangeLimit($genericNodes[0], 'min'),
+                max: self::intRangeLimit($genericNodes[1], 'max'),
             ),
             default => throw new \LogicException(\sprintf(
                 'Int range type should have 2 type arguments, got %d',
@@ -181,24 +227,16 @@ final readonly class ContextualTypeParser
     /**
      * @param 'min'|'max' $name
      */
-    private function parseIntRangeLimit(TypeNode $type, string $name): ?int
+    private function intRangeLimit(TypeNode $type, string $name): ?int
     {
-        if ($type instanceof IdentifierTypeNode) {
-            if ($type->name === $name) {
-                return null;
-            }
+        $string = (string) $type;
 
-            throw new \LogicException();
+        if ($string === $name) {
+            return null;
         }
 
-        if (!$type instanceof ConstTypeNode) {
-            throw new \LogicException();
-        }
-
-        $expr = $type->constExpr;
-
-        if ($expr instanceof ConstExprIntegerNode && is_numeric($expr->value)) {
-            return (int) $expr->value;
+        if (is_numeric($string) && !str_contains($string, '.')) {
+            return (int) $string;
         }
 
         throw new \LogicException();
@@ -207,13 +245,13 @@ final readonly class ContextualTypeParser
     /**
      * @param list<TypeNode> $genericNodes
      */
-    private function parseFloat(array $genericNodes): Type
+    private function float(array $genericNodes): Type
     {
         return match (\count($genericNodes)) {
             0 => floatT,
             2 => floatRangeT(
-                min: self::parseFloatRangeLimit($genericNodes[0], 'min'),
-                max: self::parseFloatRangeLimit($genericNodes[1], 'max'),
+                min: self::floatRangeLimit($genericNodes[0], 'min'),
+                max: self::floatRangeLimit($genericNodes[1], 'max'),
             ),
             default => throw new \LogicException(\sprintf(
                 'Float range type should have 2 type arguments, got %d',
@@ -226,24 +264,16 @@ final readonly class ContextualTypeParser
      * @param 'min'|'max' $name
      * @return ?numeric-string
      */
-    private function parseFloatRangeLimit(TypeNode $type, string $name): ?string
+    private function floatRangeLimit(TypeNode $type, string $name): ?string
     {
-        if ($type instanceof IdentifierTypeNode) {
-            if ($type->name === $name) {
-                return null;
-            }
+        $string = (string) $type;
 
-            throw new \LogicException();
+        if ($string === $name) {
+            return null;
         }
 
-        if (!$type instanceof ConstTypeNode) {
-            throw new \LogicException();
-        }
-
-        $expr = $type->constExpr;
-
-        if (($expr instanceof ConstExprFloatNode || $expr instanceof ConstExprIntegerNode) && is_numeric($expr->value)) {
-            return $expr->value;
+        if (is_numeric($string)) {
+            return $string;
         }
 
         throw new \LogicException();
@@ -252,13 +282,38 @@ final readonly class ContextualTypeParser
     /**
      * @param list<Type> $templateArguments
      */
-    private function parseArray(array $templateArguments, bool $isNonEmpty = false): ArrayDefaultT|ArrayT
+    private function list(array $templateArguments, bool $isNonEmpty = false): ListT
+    {
+        return match ($number = \count($templateArguments)) {
+            0 => new ListT(isNonEmpty: $isNonEmpty),
+            1 => new ListT(valueType: $templateArguments[0], isNonEmpty: $isNonEmpty),
+            default => throw new \LogicException(\sprintf('list type should have at most 1 type arguments, got %d', $number)),
+        };
+    }
+
+    /**
+     * @param list<Type> $templateArguments
+     */
+    private function array(array $templateArguments, bool $isNonEmpty = false): ArrayDefaultT|ArrayT
     {
         return match ($number = \count($templateArguments)) {
             0 => $isNonEmpty ? new ArrayT(isNonEmpty: true) : arrayT,
             1 => new ArrayT(valueType: $templateArguments[0], isNonEmpty: $isNonEmpty),
             2 => new ArrayT(keyType: $templateArguments[0], valueType: $templateArguments[1], isNonEmpty: $isNonEmpty),
             default => throw new \LogicException(\sprintf('array type should have at most 2 type arguments, got %d', $number)),
+        };
+    }
+
+    /**
+     * @param list<Type> $templateArguments
+     */
+    private function iterable(array $templateArguments): IterableDefaultT|IterableT
+    {
+        return match ($number = \count($templateArguments)) {
+            0 => iterableT,
+            1 => new IterableT(valueType: $templateArguments[0]),
+            2 => new IterableT(keyType: $templateArguments[0], valueType: $templateArguments[1]),
+            default => throw new \LogicException(\sprintf('iterable type should have at most 2 type arguments, got %d', $number)),
         };
     }
 }

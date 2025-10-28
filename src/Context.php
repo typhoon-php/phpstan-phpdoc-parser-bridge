@@ -9,7 +9,7 @@ use Typhoon\Type\Type;
 /**
  * @api
  */
-interface TypeContext
+interface Context
 {
     /**
      * @param non-empty-string $unresolvedName

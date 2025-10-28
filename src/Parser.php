@@ -10,18 +10,18 @@ use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
-use Typhoon\PHPStanTypeParser\Internal\ContextualTypeParser;
+use Typhoon\PHPStanTypeParser\Internal\ContextualParser;
 use Typhoon\Type\Type;
 
 /**
  * @api
  */
-final readonly class PHPStanTypeParser
+final readonly class Parser
 {
-    private CustomTypeParser $customTypeParser;
+    private CustomParser $customTypeParser;
 
     /**
-     * @param iterable<CustomTypeParser> $customTypeParsers
+     * @param iterable<CustomParser> $customTypeParsers
      */
     public function __construct(
         iterable $customTypeParsers = [],
@@ -31,10 +31,10 @@ final readonly class PHPStanTypeParser
             new ConstExprParser(new ParserConfig([])),
         ),
     ) {
-        $this->customTypeParser = new CustomTypeParsers($customTypeParsers);
+        $this->customTypeParser = new CustomParsers($customTypeParsers);
     }
 
-    public function parseString(string $type, TypeContext $context = new RuntimeTypeContext()): Type
+    public function parseString(string $type, Context $context = new RuntimeContext()): Type
     {
         $tokens = new TokenIterator($this->lexer->tokenize($type));
         $typeNode = $this->typeParser->parse($tokens);
@@ -42,8 +42,8 @@ final readonly class PHPStanTypeParser
         return $this->parseTypeNode($typeNode, $context);
     }
 
-    public function parseTypeNode(TypeNode $node, TypeContext $context = new RuntimeTypeContext()): Type
+    public function parseTypeNode(TypeNode $node, Context $context = new RuntimeContext()): Type
     {
-        return (new ContextualTypeParser($this->customTypeParser, $context))->parseTypeNode($node);
+        return (new ContextualParser($this->customTypeParser, $context))->parse($node);
     }
 }

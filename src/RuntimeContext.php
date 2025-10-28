@@ -10,7 +10,7 @@ use function Typhoon\Type\namedObjectT;
 /**
  * @api
  */
-final readonly class RuntimeTypeContext implements TypeContext
+final readonly class RuntimeContext implements Context
 {
     public function resolveConstantName(string $unresolvedName): array
     {

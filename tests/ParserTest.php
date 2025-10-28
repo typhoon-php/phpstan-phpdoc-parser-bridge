@@ -7,25 +7,34 @@ namespace Typhoon\PHPStanTypeParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Typhoon\PHPStanTypeParser\Internal\ContextualTypeParser;
+use Typhoon\PHPStanTypeParser\Internal\ContextualParser;
 use Typhoon\Type\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\arrayT;
+use function Typhoon\Type\classConstantMaskT;
+use function Typhoon\Type\classConstantT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
 use function Typhoon\Type\intT;
+use function Typhoon\Type\iterableT;
+use function Typhoon\Type\listT;
 use function Typhoon\Type\namedObjectT;
 use function Typhoon\Type\nonEmptyArrayT;
+use function Typhoon\Type\nonEmptyListT;
 use function Typhoon\Type\nullOrT;
+use function Typhoon\Type\offsetT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
 use const Typhoon\Type\arrayT;
 use const Typhoon\Type\boolT;
+use const Typhoon\Type\callableT;
+use const Typhoon\Type\closureT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
+use const Typhoon\Type\iterableT;
 use const Typhoon\Type\literalStringT;
 use const Typhoon\Type\lowercaseStringT;
 use const Typhoon\Type\mixedT;
@@ -48,9 +57,9 @@ use const Typhoon\Type\trueT;
 use const Typhoon\Type\truthyStringT;
 use const Typhoon\Type\voidT;
 
-#[CoversClass(PHPStanTypeParser::class)]
-#[CoversClass(ContextualTypeParser::class)]
-final class PHPStanTypeParserTest extends TestCase
+#[CoversClass(Parser::class)]
+#[CoversClass(ContextualParser::class)]
+final class ParserTest extends TestCase
 {
     /**
      * @return \Generator<non-empty-string, Type>
@@ -98,6 +107,9 @@ final class PHPStanTypeParserTest extends TestCase
         yield 'truthy-string' => truthyStringT;
         yield 'non-falsy-string' => nonFalsyStringT;
         yield 'string' => stringT;
+        yield 'stdClass::class' => stringT(\stdClass::class);
+        yield 'stdClass::ABC' => classConstantT(\stdClass::class, 'ABC');
+        yield 'stdClass::ABC_*' => classConstantMaskT(\stdClass::class, 'ABC_*');
         yield 'resource' => resourceT;
         yield 'array-key' => arrayKeyT;
         yield 'numeric' => numericT;
@@ -106,13 +118,24 @@ final class PHPStanTypeParserTest extends TestCase
         yield '(int|string)|float' => orT(orT(intT, stringT), floatT);
         yield 'int&string' => andT(intT, stringT);
         yield '(int&string)&float' => andT(andT(intT, stringT), floatT);
+        yield 'list' => listT();
+        yield 'non-empty-list' => nonEmptyListT();
+        yield 'list<string>' => listT(stringT);
+        yield 'non-empty-list<string>' => nonEmptyListT(stringT);
         yield 'array' => arrayT;
+        yield 'string[]' => arrayT(value: stringT);
         yield 'array<string>' => arrayT(value: stringT);
         yield 'array<int, string>' => arrayT(intT, stringT);
+        yield 'array[string]' => offsetT(arrayT, stringT);
         yield 'non-empty-array' => nonEmptyArrayT();
         yield 'non-empty-array<string>' => nonEmptyArrayT(value: stringT);
         yield 'non-empty-array<int, string>' => nonEmptyArrayT(intT, stringT);
+        yield 'iterable' => iterableT;
+        yield 'iterable<string>' => iterableT(value: stringT);
+        yield 'iterable<int, string>' => iterableT(intT, stringT);
         yield 'object' => objectT;
+        yield 'Closure' => closureT;
+        yield 'callable' => callableT;
         yield 'mixed' => mixedT;
         yield \stdClass::class => namedObjectT(\stdClass::class);
         yield \Stringable::class => namedObjectT(\Stringable::class);
@@ -120,12 +143,12 @@ final class PHPStanTypeParserTest extends TestCase
         // todo yield 'stdClass|Iterator&Throwable' https://github.com/phpstan/phpdoc-parser/issues/271
     }
 
-    private ?PHPStanTypeParser $parser = null;
+    private ?Parser $parser = null;
 
     #[DataProvider('provideCases')]
     public function test(string $string, Type $expectedType): void
     {
-        $this->parser ??= new PHPStanTypeParser();
+        $this->parser ??= new Parser();
 
         $type = $this->parser->parseString($string);
 
