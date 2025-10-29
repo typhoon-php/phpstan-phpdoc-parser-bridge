@@ -2,8 +2,13 @@
 
 namespace PHPStan\PhpDocParser\Ast\Type;
 
+use PHPStan\PhpDocParser\Ast\PhpDoc\TemplateTagValueNode;
+
 class CallableTypeNode
 {
 	/** @var list<CallableTypeParameterNode> */
 	public $parameters;
+
+	/** @var list<TemplateTagValueNode> */
+	public $templateTypes;
 }

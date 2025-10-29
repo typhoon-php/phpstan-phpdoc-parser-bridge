@@ -8,11 +8,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Typhoon\PHPStanTypeParser\Internal\ContextualParser;
-use Typhoon\Type\Type;
+use Typhoon\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\arrayT;
+use function Typhoon\Type\callableT;
 use function Typhoon\Type\classConstantMaskT;
 use function Typhoon\Type\classConstantT;
+use function Typhoon\Type\constantT;
 use function Typhoon\Type\floatRangeT;
 use function Typhoon\Type\floatT;
 use function Typhoon\Type\intRangeT;
@@ -26,11 +28,11 @@ use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\offsetT;
 use function Typhoon\Type\orT;
 use function Typhoon\Type\stringT;
+use function Typhoon\Type\template;
 use const Typhoon\Type\arrayKeyT;
 use const Typhoon\Type\arrayT;
 use const Typhoon\Type\boolT;
 use const Typhoon\Type\callableT;
-use const Typhoon\Type\closureT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
@@ -85,7 +87,7 @@ final class ParserTest extends TestCase
         yield 'int<-10, -23>' => intRangeT(-10, -23);
         yield 'int<min, 123>' => intRangeT(max: 123);
         yield 'int<-99, max>' => intRangeT(min: -99);
-        yield 'int<min, max>' => intT;
+        yield 'int<min, max>' => intRangeT();
         yield '0' => intT(0);
         yield '932' => intT(932);
         yield '-5' => intT(-5);
@@ -107,6 +109,7 @@ final class ParserTest extends TestCase
         yield 'truthy-string' => truthyStringT;
         yield 'non-falsy-string' => nonFalsyStringT;
         yield 'string' => stringT;
+        yield 'const<PHP_INT_MIN>' => constantT('PHP_INT_MIN');
         yield 'stdClass::class' => stringT(\stdClass::class);
         yield 'stdClass::ABC' => classConstantT(\stdClass::class, 'ABC');
         yield 'stdClass::ABC_*' => classConstantMaskT(\stdClass::class, 'ABC_*');
@@ -134,13 +137,15 @@ final class ParserTest extends TestCase
         yield 'iterable<string>' => iterableT(value: stringT);
         yield 'iterable<int, string>' => iterableT(intT, stringT);
         yield 'object' => objectT;
-        yield 'Closure' => closureT;
         yield 'callable' => callableT;
         yield 'mixed' => mixedT;
         yield \stdClass::class => namedObjectT(\stdClass::class);
+        yield \Closure::class => namedObjectT(\Closure::class);
         yield \Stringable::class => namedObjectT(\Stringable::class);
         yield 'Traversable<int, string>' => namedObjectT(\Traversable::class, [intT, stringT]);
         // todo yield 'stdClass|Iterator&Throwable' https://github.com/phpstan/phpdoc-parser/issues/271
+        $T = template('T', upperBound: scalarT, lowerBound: stringT, default: arrayKeyT);
+        yield 'callable<T of scalar super string = array-key>(T): ?T' => callableT([$T], [$T->type], nullOrT($T->type));
     }
 
     private ?Parser $parser = null;

@@ -4,8 +4,68 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d957010ae9ed951da8909160e3dbdd53",
+    "content-hash": "b6524d6c03cb5b5162e5f10440ce9015",
     "packages": [
+        {
+            "name": "brick/math",
+            "version": "0.14.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/math.git",
+                "reference": "113a8ee2656b882d4c3164fa31aa6e12cbb7aaa2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/math/zipball/113a8ee2656b882d4c3164fa31aa6e12cbb7aaa2",
+                "reference": "113a8ee2656b882d4c3164fa31aa6e12cbb7aaa2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.2",
+                "phpstan/phpstan": "2.1.22",
+                "phpunit/phpunit": "^11.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\Math\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Arbitrary-precision arithmetic library",
+            "keywords": [
+                "Arbitrary-precision",
+                "BigInteger",
+                "BigRational",
+                "arithmetic",
+                "bigdecimal",
+                "bignum",
+                "bignumber",
+                "brick",
+                "decimal",
+                "integer",
+                "math",
+                "mathematics",
+                "rational"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/math/issues",
+                "source": "https://github.com/brick/math/tree/0.14.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-29T12:40:03+00:00"
+        },
         {
             "name": "phpstan/phpdoc-parser",
             "version": "2.3.0",
@@ -134,93 +194,33 @@
             "time": "2025-07-08T02:45:35+00:00"
         },
         {
-            "name": "typhoon/float-to-string",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/typhoon-php/float-to-string.git",
-                "reference": "315d8f06948d442aabaca62972ead71499c36b31"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/float-to-string/zipball/315d8f06948d442aabaca62972ead71499c36b31",
-                "reference": "315d8f06948d442aabaca62972ead71499c36b31",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "bamarni/composer-bin-plugin": "^1.8.2",
-                "phpunit/phpunit": "^10.5.58"
-            },
-            "type": "library",
-            "extra": {
-                "bamarni-bin": {
-                    "bin-links": false,
-                    "forward-command": true,
-                    "target-directory": "tools"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/floatToString.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Valentin Udaltsov",
-                    "email": "udaltsov.valentin@gmail.com"
-                },
-                {
-                    "name": "Typhoon Team",
-                    "homepage": "https://github.com/orgs/typhoon-php/people"
-                }
-            ],
-            "description": "A function that converts any float to a numeric string in PHP",
-            "support": {
-                "issues": "https://github.com/typhoon-php/float-to-string/issues",
-                "source": "https://github.com/typhoon-php/float-to-string/tree/0.1.0"
-            },
-            "funding": [
-                {
-                    "url": "https://www.tinkoff.ru/cf/5MqZQas2dk7",
-                    "type": "custom"
-                }
-            ],
-            "time": "2025-10-28T18:56:15+00:00"
-        },
-        {
             "name": "typhoon/type",
-            "version": "0.5.x-dev",
+            "version": "0.6.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "a5bd1a114ff0aed42820434456eb490ad483c439"
+                "reference": "b46376853bad3c25fd15a8d75522ecd41b322d3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/a5bd1a114ff0aed42820434456eb490ad483c439",
-                "reference": "a5bd1a114ff0aed42820434456eb490ad483c439",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/b46376853bad3c25fd15a8d75522ecd41b322d3e",
+                "reference": "b46376853bad3c25fd15a8d75522ecd41b322d3e",
                 "shasum": ""
             },
             "require": {
+                "brick/math": "^0.14.0",
                 "php": "^8.2",
-                "symfony/polyfill-php83": "^1.33",
-                "typhoon/float-to-string": "^0.1.0"
+                "symfony/polyfill-php83": "^1.33"
             },
             "require-dev": {
                 "bamarni/composer-bin-plugin": "^1.8.2",
                 "nette/php-generator": "^4.2.0",
-                "phpunit/phpunit": "^10.5.58",
-                "symfony/finder": "^6.4.24",
+                "phpunit/phpunit": "^11.5.42",
+                "symfony/finder": "^7.3.5",
                 "symfony/polyfill-php85": "^1.33",
-                "symfony/var-dumper": "^7.3.4"
+                "symfony/var-dumper": "^7.3.5"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -231,11 +231,11 @@
             },
             "autoload": {
                 "files": [
-                    "src/constructors.php",
-                    "src/stringify.php"
+                    "src/Type/constructors.php",
+                    "src/Type/stringify.php"
                 ],
                 "psr-4": {
-                    "Typhoon\\Type\\": "src/"
+                    "Typhoon\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -255,7 +255,7 @@
             "description": "Typhoon Type System",
             "support": {
                 "issues": "https://github.com/typhoon-php/type/issues",
-                "source": "https://github.com/typhoon-php/type/tree/0.5.x"
+                "source": "https://github.com/typhoon-php/type/tree/0.6.x"
             },
             "funding": [
                 {
@@ -263,7 +263,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-10-29T04:16:42+00:00"
+            "time": "2025-10-31T04:23:40+00:00"
         }
     ],
     "packages-dev": [

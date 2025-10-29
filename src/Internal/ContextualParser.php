@@ -12,7 +12,10 @@ use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNullNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprTrueNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstFetchNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\TemplateTagValueNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\CallableTypeParameterNode;
 use PHPStan\PhpDocParser\Ast\Type\ConstTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
@@ -23,12 +26,17 @@ use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use Typhoon\PHPStanTypeParser\Context;
 use Typhoon\PHPStanTypeParser\CustomParser;
+use Typhoon\Type;
 use Typhoon\Type\ArrayDefaultT;
 use Typhoon\Type\ArrayT;
+use Typhoon\Type\CallableT;
+use Typhoon\Type\ConstantT;
 use Typhoon\Type\IterableDefaultT;
 use Typhoon\Type\IterableT;
 use Typhoon\Type\ListT;
-use Typhoon\Type\Type;
+use Typhoon\Type\Parameter;
+use Typhoon\Type\Template;
+use Typhoon\Type\TemplateT;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\arrayT;
 use function Typhoon\Type\classConstantMaskT;
@@ -41,12 +49,12 @@ use function Typhoon\Type\intT;
 use function Typhoon\Type\nullOrT;
 use function Typhoon\Type\offsetT;
 use function Typhoon\Type\orT;
+use function Typhoon\Type\param;
 use function Typhoon\Type\stringT;
 use const Typhoon\Type\arrayKeyT;
 use const Typhoon\Type\arrayT;
 use const Typhoon\Type\boolT;
 use const Typhoon\Type\callableT;
-use const Typhoon\Type\closureT;
 use const Typhoon\Type\falseT;
 use const Typhoon\Type\floatT;
 use const Typhoon\Type\intT;
@@ -76,11 +84,16 @@ use const Typhoon\Type\voidT;
  * @internal
  * @psalm-internal Typhoon\PHPStanTypeParser
  */
-final readonly class ContextualParser
+final class ContextualParser
 {
+    /**
+     * @var array<non-empty-string, TemplateT>
+     */
+    private array $templateTypes = [];
+
     public function __construct(
-        private CustomParser $customTypeParser,
-        private Context $context,
+        private readonly CustomParser $customTypeParser,
+        private readonly Context $context,
     ) {}
 
     public function parse(TypeNode $node): Type
@@ -95,6 +108,7 @@ final readonly class ContextualParser
                 $node instanceof IntersectionTypeNode => andT(...array_map($this->parse(...), $node->types)),
                 $node instanceof ArrayTypeNode => arrayT(value: $this->parse($node->type)),
                 $node instanceof OffsetAccessTypeNode => offsetT($this->parse($node->type), $this->parse($node->offset)),
+                $node instanceof CallableTypeNode => $this->callable($node),
                 default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
             };
     }
@@ -115,6 +129,7 @@ final readonly class ContextualParser
             },
             $node instanceof ConstExprStringNode => stringT($node->value),
             $node instanceof ConstFetchNode => $this->constantFetch($node),
+            // todo $node instanceof ConstExprArrayNode => array shape
             default => throw new \LogicException(\sprintf('PhpDoc node %s is not supported', $node::class)),
         };
     }
@@ -167,7 +182,6 @@ final readonly class ContextualParser
             'numeric' => numericT,
             'scalar' => scalarT,
             'object' => objectT,
-            'Closure' => closureT,
             'callable' => callableT,
             'mixed' => mixedT,
             default => null,
@@ -189,6 +203,10 @@ final readonly class ContextualParser
             return $this->float($genericNodes);
         }
 
+        if ($name === 'const') {
+            return $this->const($genericNodes);
+        }
+
         $templateArguments = array_map($this->parse(...), $genericNodes);
 
         if ($name === 'list' || $name === 'non-empty-list') {
@@ -203,7 +221,7 @@ final readonly class ContextualParser
             return $this->iterable($templateArguments);
         }
 
-        return $this->context->resolveNameAsType($name, $templateArguments);
+        return $this->templateTypes[$name] ?? $this->context->resolveNameAsType($name, $templateArguments);
     }
 
     /**
@@ -287,7 +305,7 @@ final readonly class ContextualParser
         return match ($number = \count($templateArguments)) {
             0 => new ListT(isNonEmpty: $isNonEmpty),
             1 => new ListT(valueType: $templateArguments[0], isNonEmpty: $isNonEmpty),
-            default => throw new \LogicException(\sprintf('list type should have at most 1 type arguments, got %d', $number)),
+            default => throw new \LogicException(\sprintf('list type should have at most 1 type argument, got %d', $number)),
         };
     }
 
@@ -315,5 +333,54 @@ final readonly class ContextualParser
             2 => new IterableT(keyType: $templateArguments[0], valueType: $templateArguments[1]),
             default => throw new \LogicException(\sprintf('iterable type should have at most 2 type arguments, got %d', $number)),
         };
+    }
+
+    /**
+     * @param list<TypeNode> $genericNodes
+     */
+    private function const(array $genericNodes): ConstantT
+    {
+        if (\count($genericNodes) !== 1) {
+            throw new \LogicException(\sprintf('const type should have exactly 1 type argument, got %d', \count($genericNodes)));
+        }
+
+        $node = $genericNodes[0];
+
+        if (!$node instanceof IdentifierTypeNode) {
+            throw new \LogicException();
+        }
+
+        return new ConstantT($node->name);
+    }
+
+    private function callable(CallableTypeNode $node): CallableT
+    {
+        foreach ($node->templateTypes as $templateNode) {
+            $this->templateTypes[$templateNode->name] = new TemplateT();
+        }
+
+        return new CallableT(
+            templates: array_map(
+                fn(TemplateTagValueNode $node): Template => new Template(
+                    name: $node->name,
+                    lowerBound: $node->lowerBound === null ? neverT : $this->parse($node->lowerBound),
+                    upperBound: $node->bound === null ? mixedT : $this->parse($node->bound),
+                    default: $node->default === null ? null : $this->parse($node->default),
+                    type: $this->templateTypes[$node->name],
+                ),
+                $node->templateTypes,
+            ),
+            parameters: array_map(
+                fn(CallableTypeParameterNode $node): Parameter => new Parameter(
+                    name: $node->parameterName === '' ? null : $node->parameterName,
+                    type: $this->parse($node->type),
+                    hasDefault: $node->isOptional,
+                    isPassedByReference: $node->isReference,
+                    isVariadic: $node->isVariadic,
+                ),
+                $node->parameters,
+            ),
+            returnType: $this->parse($node->returnType),
+        );
     }
 }

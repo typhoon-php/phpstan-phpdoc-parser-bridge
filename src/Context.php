@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Typhoon\PHPStanTypeParser;
 
-use Typhoon\Type\Type;
+use Typhoon\Type;
 
 /**
  * @api
