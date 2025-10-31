@@ -27,11 +27,11 @@ use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
 use Typhoon\PHPStanTypeParser\Context;
 use Typhoon\PHPStanTypeParser\CustomParser;
 use Typhoon\Type;
-use Typhoon\Type\ArrayDefaultT;
+use Typhoon\Type\ArrayBareT;
 use Typhoon\Type\ArrayT;
 use Typhoon\Type\CallableT;
 use Typhoon\Type\ConstantT;
-use Typhoon\Type\IterableDefaultT;
+use Typhoon\Type\IterableBareT;
 use Typhoon\Type\IterableT;
 use Typhoon\Type\ListT;
 use Typhoon\Type\Parameter;
@@ -232,8 +232,8 @@ final class ContextualParser
         return match (\count($genericNodes)) {
             0 => intT,
             2 => intRangeT(
-                min: self::intRangeLimit($genericNodes[0], 'min'),
-                max: self::intRangeLimit($genericNodes[1], 'max'),
+                min: self::intRangeLimit($genericNodes[0]),
+                max: self::intRangeLimit($genericNodes[1]),
             ),
             default => throw new \LogicException(\sprintf(
                 'Int range type should have 2 type arguments, got %d',
@@ -242,22 +242,16 @@ final class ContextualParser
         };
     }
 
-    /**
-     * @param 'min'|'max' $name
-     */
-    private function intRangeLimit(TypeNode $type, string $name): ?int
+    private function intRangeLimit(TypeNode $type): int
     {
         $string = (string) $type;
 
-        if ($string === $name) {
-            return null;
-        }
-
-        if (is_numeric($string) && !str_contains($string, '.')) {
-            return (int) $string;
-        }
-
-        throw new \LogicException();
+        return match (true) {
+            $string === 'min' => PHP_INT_MIN,
+            $string === 'max' => PHP_INT_MAX,
+            preg_match('/^-?\d+$/D', $string) === 1 => (int) $string,
+            default => throw new \LogicException(),
+        };
     }
 
     /**
@@ -312,7 +306,7 @@ final class ContextualParser
     /**
      * @param list<Type> $templateArguments
      */
-    private function array(array $templateArguments, bool $isNonEmpty = false): ArrayDefaultT|ArrayT
+    private function array(array $templateArguments, bool $isNonEmpty = false): ArrayBareT|ArrayT
     {
         return match ($number = \count($templateArguments)) {
             0 => $isNonEmpty ? new ArrayT(isNonEmpty: true) : arrayT,
@@ -325,7 +319,7 @@ final class ContextualParser
     /**
      * @param list<Type> $templateArguments
      */
-    private function iterable(array $templateArguments): IterableDefaultT|IterableT
+    private function iterable(array $templateArguments): IterableBareT|IterableT
     {
         return match ($number = \count($templateArguments)) {
             0 => iterableT,
