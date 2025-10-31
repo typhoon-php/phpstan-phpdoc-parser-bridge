@@ -355,19 +355,20 @@ final class ContextualParser
 
     private function callable(CallableTypeNode $node): CallableT
     {
+        $templates = [];
+
         foreach ($node->templateTypes as $templateNode) {
-            $this->templateTypes[$templateNode->name] = new TemplateT();
+            $template = new Template($templateNode->name);
+            $templates[$templateNode->name] = $template;
+            $this->templateTypes[$templateNode->name] = $template->type;
         }
 
         return new CallableT(
             templates: array_map(
-                fn(TemplateTagValueNode $node): Template => new Template(
-                    name: $node->name,
-                    lowerBound: $node->lowerBound === null ? neverT : $this->parse($node->lowerBound),
-                    upperBound: $node->bound === null ? mixedT : $this->parse($node->bound),
-                    default: $node->default === null ? null : $this->parse($node->default),
-                    type: $this->templateTypes[$node->name],
-                ),
+                fn(TemplateTagValueNode $node): Template => $templates[$node->name]
+                    ->withLowerBound($node->lowerBound === null ? neverT : $this->parse($node->lowerBound))
+                    ->withUpperBound($node->bound === null ? mixedT : $this->parse($node->bound))
+                    ->withDefault($node->default === null ? null : $this->parse($node->default)),
                 $node->templateTypes,
             ),
             parameters: array_map(
