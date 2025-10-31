@@ -146,6 +146,9 @@ final class ParserTest extends TestCase
         // todo yield 'stdClass|Iterator&Throwable' https://github.com/phpstan/phpdoc-parser/issues/271
         $T = template('T', upperBound: scalarT, lowerBound: stringT, default: arrayKeyT);
         yield 'callable<T of scalar super string = array-key>(T): ?T' => callableT([$T], [$T->type], nullOrT($T->type));
+        $T2 = template('T2');
+        $T = template('T', $T2->type);
+        yield 'callable<T of T2, T2>(): mixed' => callableT([$T, $T2]);
     }
 
     private ?Parser $parser = null;

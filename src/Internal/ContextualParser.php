@@ -349,21 +349,28 @@ final class ContextualParser
 
     private function callable(CallableTypeNode $node): CallableT
     {
-        $templates = [];
-
-        foreach ($node->templateTypes as $templateNode) {
-            $template = new Template($templateNode->name);
-            $templates[$templateNode->name] = $template;
-            $this->templateTypes[$templateNode->name] = $template->type;
-        }
-
         return new CallableT(
             templates: array_map(
-                fn(TemplateTagValueNode $node): Template => $templates[$node->name]
-                    ->withLowerBound($node->lowerBound === null ? neverT : $this->parse($node->lowerBound))
-                    ->withUpperBound($node->bound === null ? mixedT : $this->parse($node->bound))
-                    ->withDefault($node->default === null ? null : $this->parse($node->default)),
-                $node->templateTypes,
+                // 4. resolve templates
+                static fn(\Closure $lazyTemplate): Template => $lazyTemplate(),
+                array_map(
+                    function (TemplateTagValueNode $node): \Closure {
+                        // 2. create template factory
+                        $factory = Template::factory(
+                            name: $node->name,
+                            // 1. assign template type by reference
+                            type: $this->templateTypes[$node->name],
+                        );
+
+                        // 3. apply the rest of the template's properties to the factory
+                        return fn(): Template => $factory(
+                            lowerBound: $node->lowerBound === null ? neverT : $this->parse($node->lowerBound),
+                            upperBound: $node->bound === null ? mixedT : $this->parse($node->bound),
+                            default: $node->default === null ? null : $this->parse($node->default),
+                        );
+                    },
+                    $node->templateTypes,
+                ),
             ),
             parameters: array_map(
                 fn(CallableTypeParameterNode $node): Parameter => new Parameter(
