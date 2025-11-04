@@ -13,6 +13,7 @@ use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprTrueNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstFetchNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TemplateTagValueNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\CallableTypeParameterNode;
@@ -107,6 +108,7 @@ final class ContextualParser
                 $node instanceof UnionTypeNode => orT(...array_map($this->parse(...), $node->types)),
                 $node instanceof IntersectionTypeNode => andT(...array_map($this->parse(...), $node->types)),
                 $node instanceof ArrayTypeNode => arrayT(value: $this->parse($node->type)),
+                $node instanceof ArrayShapeNode => $this->arrayShape($node),
                 $node instanceof OffsetAccessTypeNode => offsetT($this->parse($node->type), $this->parse($node->offset)),
                 $node instanceof CallableTypeNode => $this->callable($node),
                 default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
@@ -301,6 +303,56 @@ final class ContextualParser
             1 => new ListT(valueType: $templateArguments[0], isNonEmpty: $isNonEmpty),
             default => throw new \LogicException(\sprintf('list type should have at most 1 type argument, got %d', $number)),
         };
+    }
+
+    private function arrayShape(ArrayShapeNode $node): Type
+    {
+        $elements = [];
+
+        foreach ($node->items as $item) {
+            $elements[] = new Type\ArrayElement(
+                key: match (true) {
+                    $item->keyName === null => \count($elements),
+                    $item->keyName instanceof ConstExprIntegerNode => (int) $item->keyName->value,
+                    $item->keyName instanceof ConstExprStringNode => $item->keyName->value,
+                    $item->keyName instanceof IdentifierTypeNode => $item->keyName->name,
+                    default => throw new \LogicException(),
+                },
+                type: $this->parse($item->valueType),
+                isOptional: $item->optional,
+            );
+        }
+
+        $valueType = match (true) {
+            $node->sealed => neverT,
+            $node->unsealedType === null => mixedT,
+            default => $this->parse($node->unsealedType->valueType),
+        };
+
+        if (($node->kind === ArrayShapeNode::KIND_NON_EMPTY_LIST || $node->kind === ArrayShapeNode::KIND_LIST)
+            && $node->unsealedType?->keyType === null
+            && array_column($elements, 'key') === array_keys($elements)
+            && array_all($elements, static fn(Type\ArrayElement $e): bool => !$e->isOptional)
+        ) {
+            return new ListT(
+                valueType: $valueType,
+                elementTypes: array_column($elements, 'type'),
+                isNonEmpty: $node->kind === ArrayShapeNode::KIND_NON_EMPTY_LIST,
+            );
+        }
+
+        $keyType = match (true) {
+            $node->sealed => neverT,
+            $node->unsealedType?->keyType === null => arrayKeyT,
+            default => $this->parse($node->unsealedType->keyType),
+        };
+
+        return new ArrayT(
+            keyType: $keyType,
+            valueType: $valueType,
+            elements: $elements,
+            isNonEmpty: $node->kind === ArrayShapeNode::KIND_NON_EMPTY_LIST,
+        );
     }
 
     /**
