@@ -7,7 +7,6 @@ namespace Typhoon\PHPStanTypeParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Typhoon\PHPStanTypeParser\Internal\ContextualParser;
 use Typhoon\Type;
 use function Typhoon\Type\andT;
 use function Typhoon\Type\arrayShapeT;
@@ -65,7 +64,6 @@ use const Typhoon\Type\truthyStringT;
 use const Typhoon\Type\voidT;
 
 #[CoversClass(Parser::class)]
-#[CoversClass(ContextualParser::class)]
 final class ParserTest extends TestCase
 {
     /**
@@ -159,6 +157,7 @@ final class ParserTest extends TestCase
         yield 'callable' => callableT;
         yield 'mixed' => mixedT;
         yield \stdClass::class => namedObjectT(\stdClass::class);
+        yield '\\' . \stdClass::class => namedObjectT(\stdClass::class);
         yield \Closure::class => namedObjectT(\Closure::class);
         yield \Stringable::class => namedObjectT(\Stringable::class);
         yield 'Traversable<int, string>' => namedObjectT(\Traversable::class, [intT, stringT]);

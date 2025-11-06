@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c9778be813363f87d91ed08c74f96f7",
+    "content-hash": "7a1220d5bd5416e590950e675d05f188",
     "packages": [
         {
             "name": "brick/math",
@@ -275,16 +275,16 @@
         },
         {
             "name": "typhoon/type",
-            "version": "0.6.x-dev",
+            "version": "0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "ab8a66967b4481e0d9c9fe6aa3f71f3865728389"
+                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/ab8a66967b4481e0d9c9fe6aa3f71f3865728389",
-                "reference": "ab8a66967b4481e0d9c9fe6aa3f71f3865728389",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/a7282d377ad5d3b7eea1adb45b615b88b37d8950",
+                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950",
                 "shasum": ""
             },
             "require": {
@@ -300,7 +300,6 @@
                 "symfony/polyfill-php85": "^1.33",
                 "symfony/var-dumper": "^7.3.5"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -312,6 +311,7 @@
             "autoload": {
                 "files": [
                     "src/Type/constructors.php",
+                    "src/Type/fromReflection.php",
                     "src/Type/stringify.php"
                 ],
                 "psr-4": {
@@ -335,7 +335,7 @@
             "description": "Typhoon Type System",
             "support": {
                 "issues": "https://github.com/typhoon-php/type/issues",
-                "source": "https://github.com/typhoon-php/type/tree/0.6.x"
+                "source": "https://github.com/typhoon-php/type/tree/0.6.0"
             },
             "funding": [
                 {
@@ -343,7 +343,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-10-31T19:11:02+00:00"
+            "time": "2025-11-05T17:10:17+00:00"
         }
     ],
     "packages-dev": [
@@ -2414,9 +2414,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "typhoon/type": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

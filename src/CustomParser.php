@@ -12,8 +12,5 @@ use Typhoon\Type;
  */
 interface CustomParser
 {
-    /**
-     * @param callable(TypeNode): Type $parse
-     */
-    public function parse(TypeNode $node, callable $parse, Context $context): ?Type;
+    public function parse(TypeNode $node, Parser $parser): ?Type;
 }

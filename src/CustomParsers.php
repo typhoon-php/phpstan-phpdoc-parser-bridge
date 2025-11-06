@@ -19,10 +19,10 @@ final readonly class CustomParsers implements CustomParser
         private iterable $customTypeParsers = [],
     ) {}
 
-    public function parse(TypeNode $node, callable $parse, Context $context): ?Type
+    public function parse(TypeNode $node, Parser $parser): ?Type
     {
         foreach ($this->customTypeParsers as $customTypeParser) {
-            $type = $customTypeParser->parse($node, $parse, $context);
+            $type = $customTypeParser->parse($node, $parser);
 
             if ($type !== null) {
                 return $type;
