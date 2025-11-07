@@ -92,7 +92,7 @@ final class Parser
     private readonly CustomParser $customParser;
 
     /**
-     * @param iterable<CustomParsers> $customParsers
+     * @param iterable<CustomParser> $customParsers
      */
     public function __construct(
         iterable $customParsers = [],
