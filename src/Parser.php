@@ -87,24 +87,31 @@ use const Typhoon\Type\voidT;
 /**
  * @api
  */
-final readonly class Parser
+final class Parser
 {
+    private readonly CustomParser $customParser;
+
+    /**
+     * @param iterable<CustomParsers> $customParsers
+     */
     public function __construct(
+        iterable $customParsers = [],
         public Context $context = new Context(),
-        private Lexer $lexer = new Lexer(new ParserConfig([])),
-        private TypeParser $typeParser = new TypeParser(
+        private readonly Lexer $lexer = new Lexer(new ParserConfig([])),
+        private readonly TypeParser $typeParser = new TypeParser(
             new ParserConfig([]),
             new ConstExprParser(new ParserConfig([])),
         ),
-    ) {}
+    ) {
+        $this->customParser = new CustomParsers($customParsers);
+    }
 
     private function withContext(Context $context): self
     {
-        return new self(
-            context: $context,
-            lexer: $this->lexer,
-            typeParser: $this->typeParser,
-        );
+        $parser = clone $this;
+        $parser->context = $context;
+
+        return $parser;
     }
 
     public function parseString(string $type): Type
@@ -117,19 +124,20 @@ final readonly class Parser
 
     public function parseTypeNode(TypeNode $node): Type
     {
-        return match (true) {
-            $node instanceof NullableTypeNode => nullOrT($this->parseTypeNode($node->type)),
-            $node instanceof ConstTypeNode => $this->constExpr($node->constExpr),
-            $node instanceof IdentifierTypeNode => $this->identifier($node->name),
-            $node instanceof GenericTypeNode => $this->identifier($node->type->name, $node->genericTypes),
-            $node instanceof UnionTypeNode => orT(...array_map($this->parseTypeNode(...), $node->types)),
-            $node instanceof IntersectionTypeNode => andT(...array_map($this->parseTypeNode(...), $node->types)),
-            $node instanceof ArrayTypeNode => arrayT(value: $this->parseTypeNode($node->type)),
-            $node instanceof ArrayShapeNode => $this->arrayShape($node),
-            $node instanceof OffsetAccessTypeNode => offsetT($this->parseTypeNode($node->type), $this->parseTypeNode($node->offset)),
-            $node instanceof CallableTypeNode => $this->callable($node),
-            default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
-        };
+        return $this->customParser->parse($node, $this)
+            ?? match (true) {
+                $node instanceof NullableTypeNode => nullOrT($this->parseTypeNode($node->type)),
+                $node instanceof ConstTypeNode => $this->constExpr($node->constExpr),
+                $node instanceof IdentifierTypeNode => $this->identifier($node->name),
+                $node instanceof GenericTypeNode => $this->identifier($node->type->name, $node->genericTypes),
+                $node instanceof UnionTypeNode => orT(...array_map($this->parseTypeNode(...), $node->types)),
+                $node instanceof IntersectionTypeNode => andT(...array_map($this->parseTypeNode(...), $node->types)),
+                $node instanceof ArrayTypeNode => arrayT(value: $this->parseTypeNode($node->type)),
+                $node instanceof ArrayShapeNode => $this->arrayShape($node),
+                $node instanceof OffsetAccessTypeNode => offsetT($this->parseTypeNode($node->type), $this->parseTypeNode($node->offset)),
+                $node instanceof CallableTypeNode => $this->callable($node),
+                default => throw new \LogicException(\sprintf('`%s` is not supported', $node::class)),
+            };
     }
 
     private function constExpr(ConstExprNode $node): Type
