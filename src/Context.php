@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Typhoon\PHPStanTypeParser;
 
-use Typhoon\Type\AliasT;
+use Typhoon\Type\Alias\AtClass;
+use Typhoon\Type\Alias\AtFunction;
 use Typhoon\Type\TemplateT;
 
 final class Context
@@ -20,7 +21,7 @@ final class Context
     private array $templates = [];
 
     /**
-     * @var array<non-empty-string, AliasT>
+     * @var array<non-empty-string, AtFunction|AtClass>
      */
     private array $aliases = [];
 
@@ -47,7 +48,7 @@ final class Context
     /**
      * @param ?non-empty-string $as
      */
-    public function useAlias(AliasT $alias, ?string $as = null): self
+    public function useAlias(AtFunction|AtClass $alias, ?string $as = null): self
     {
         $context = clone $this;
         $context->aliases[$as ?? $alias->name] = $alias;
@@ -60,7 +61,7 @@ final class Context
         return Name::parse($name)->resolveClass($this->namespace, $this->importTable);
     }
 
-    public function resolve(string $name): Name|TemplateT|AliasT
+    public function resolve(string $name): TemplateT|AtFunction|AtClass|Name
     {
         return $this->templates[$name] ?? $this->aliases[$name] ?? $this->resolveAsClass($name);
     }

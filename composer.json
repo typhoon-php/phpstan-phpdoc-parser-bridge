@@ -18,7 +18,7 @@
         "brick/math": "^0.14.0",
         "phpstan/phpdoc-parser": "^2.1",
         "symfony/polyfill-php84": "^1.33",
-        "typhoon/type": "^0.6@dev"
+        "typhoon/type": "dev-alias"
     },
     "require-dev": {
         "bamarni/composer-bin-plugin": "^1.8.2",
