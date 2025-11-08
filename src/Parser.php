@@ -106,7 +106,7 @@ final class Parser
         $this->customParser = new CustomParsers($customParsers);
     }
 
-    private function withContext(Context $context): self
+    public function withContext(Context $context): self
     {
         $parser = clone $this;
         $parser->context = $context;
