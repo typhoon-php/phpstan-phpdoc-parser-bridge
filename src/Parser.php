@@ -31,6 +31,7 @@ use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
 use Typhoon\Type;
+use Typhoon\Type\AliasT;
 use Typhoon\Type\ArrayBareT;
 use Typhoon\Type\ArrayT;
 use Typhoon\Type\CallableT;
@@ -277,6 +278,14 @@ final class Parser
             return $resolved;
         }
 
+        if ($resolved instanceof AliasT) {
+            return new AliasT(
+                class: $resolved->class,
+                name: $resolved->name,
+                templateArguments: $templateArguments,
+            );
+        }
+
         /** @var class-string */
         $class = $resolved->toString();
 
@@ -404,7 +413,7 @@ final class Parser
 
         foreach ($node->templateTypes as $templateNode) {
             $templateFactories[] = Template::factory($templateNode->name, type: $type);
-            $context = $context->template($type);
+            $context = $context->useTemplate($type);
         }
 
         $parser = $this->withContext($context);

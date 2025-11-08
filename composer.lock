@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c4221b33be8acceb544bddc5e919cd9b",
+    "content-hash": "1390cb1eef098150aee68f6bb3027204",
     "packages": [
         {
             "name": "brick/math",
@@ -275,16 +275,16 @@
         },
         {
             "name": "typhoon/type",
-            "version": "0.6.0",
+            "version": "0.6.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950"
+                "reference": "e2472d813468b86b452ecf6b3eacf19f38036e1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/a7282d377ad5d3b7eea1adb45b615b88b37d8950",
-                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/e2472d813468b86b452ecf6b3eacf19f38036e1a",
+                "reference": "e2472d813468b86b452ecf6b3eacf19f38036e1a",
                 "shasum": ""
             },
             "require": {
@@ -300,6 +300,7 @@
                 "symfony/polyfill-php85": "^1.33",
                 "symfony/var-dumper": "^7.3.5"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -335,7 +336,7 @@
             "description": "Typhoon Type System",
             "support": {
                 "issues": "https://github.com/typhoon-php/type/issues",
-                "source": "https://github.com/typhoon-php/type/tree/0.6.0"
+                "source": "https://github.com/typhoon-php/type/tree/0.6.x"
             },
             "funding": [
                 {
@@ -343,7 +344,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-11-05T17:10:17+00:00"
+            "time": "2025-11-08T19:53:22+00:00"
         }
     ],
     "packages-dev": [
@@ -2414,7 +2415,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "typhoon/type": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
