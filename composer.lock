@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a71073b9de43aeecd19fc0655db58757",
+    "content-hash": "44f031adf1f3a0aa455b933d166604a5",
     "packages": [
         {
             "name": "brick/math",
@@ -275,16 +275,16 @@
         },
         {
             "name": "typhoon/type",
-            "version": "0.6.0",
+            "version": "dev-alias",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950"
+                "reference": "550e9dd76b5ede31de064a0b824af0eeaea32720"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/a7282d377ad5d3b7eea1adb45b615b88b37d8950",
-                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/550e9dd76b5ede31de064a0b824af0eeaea32720",
+                "reference": "550e9dd76b5ede31de064a0b824af0eeaea32720",
                 "shasum": ""
             },
             "require": {
@@ -335,7 +335,7 @@
             "description": "Typhoon Type System",
             "support": {
                 "issues": "https://github.com/typhoon-php/type/issues",
-                "source": "https://github.com/typhoon-php/type/tree/0.6.0"
+                "source": "https://github.com/typhoon-php/type/tree/alias"
             },
             "funding": [
                 {
@@ -343,7 +343,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-11-05T17:10:17+00:00"
+            "time": "2025-11-10T07:52:12+00:00"
         }
     ],
     "packages-dev": [
@@ -977,16 +977,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "11.5.43",
+            "version": "11.5.42",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c6b89b6cf4324a8b4cb86e1f5dfdd6c9e0371924"
+                "reference": "1c6cb5dfe412af3d0dfd414cfd110e3b9cfdbc3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c6b89b6cf4324a8b4cb86e1f5dfdd6c9e0371924",
-                "reference": "c6b89b6cf4324a8b4cb86e1f5dfdd6c9e0371924",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1c6cb5dfe412af3d0dfd414cfd110e3b9cfdbc3c",
+                "reference": "1c6cb5dfe412af3d0dfd414cfd110e3b9cfdbc3c",
                 "shasum": ""
             },
             "require": {
@@ -1058,7 +1058,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.43"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.42"
             },
             "funding": [
                 {
@@ -1082,7 +1082,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-30T08:39:39+00:00"
+            "time": "2025-09-28T12:09:13+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -2414,7 +2414,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "typhoon/type": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

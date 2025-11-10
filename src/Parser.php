@@ -31,6 +31,9 @@ use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use PHPStan\PhpDocParser\ParserConfig;
 use Typhoon\Type;
+use Typhoon\Type\AliasAtClassT;
+use Typhoon\Type\AliasAtFunctionT;
+use Typhoon\Type\AliasT;
 use Typhoon\Type\ArrayBareT;
 use Typhoon\Type\ArrayT;
 use Typhoon\Type\CallableT;
@@ -275,6 +278,14 @@ final class Parser
             }
 
             return $resolved;
+        }
+
+        if ($resolved instanceof AliasAtFunctionT || $resolved instanceof AliasAtClassT) {
+            if ($templateArguments === []) {
+                return $resolved;
+            }
+
+            return new AliasT($resolved, $templateArguments);
         }
 
         /** @var class-string */

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Typhoon\PHPStanTypeParser;
 
+use Typhoon\Type\AliasAtClassT;
+use Typhoon\Type\AliasAtFunctionT;
 use Typhoon\Type\TemplateT;
+use function Typhoon\Type\stringify;
 
 final class Context
 {
@@ -17,6 +20,11 @@ final class Context
      * @var array<non-empty-string, TemplateT>
      */
     private array $templates = [];
+
+    /**
+     * @var array<non-empty-string, AliasAtFunctionT|AliasAtClassT>
+     */
+    private array $aliases = [];
 
     public function __construct(
         public readonly ?Name $namespace = null,
@@ -38,13 +46,40 @@ final class Context
         return $context;
     }
 
+    /**
+     * @param ?non-empty-string $as
+     */
+    public function useAlias(AliasAtFunctionT|AliasAtClassT $alias, ?string $as = null): self
+    {
+        $context = clone $this;
+        $context->aliases[$as ?? $alias->name] = $alias;
+
+        return $context;
+    }
+
     public function resolveAsClass(string $name): Name
     {
         return Name::parse($name)->resolveClass($this->namespace, $this->importTable);
     }
 
-    public function resolve(string $name): TemplateT|Name
+    public function resolve(string $name): TemplateT|AliasAtFunctionT|AliasAtClassT|Name
     {
-        return $this->templates[$name] ?? $this->resolveAsClass($name);
+        return $this->templates[$name] ?? $this->aliases[$name] ?? $this->resolveAsClass($name);
+    }
+
+    /**
+     * @return ?non-empty-string
+     */
+    public function nameAlias(AliasAtFunctionT|AliasAtClassT $alias): ?string
+    {
+        $asString = stringify($alias);
+
+        foreach ($this->aliases as $name => $usedAlias) {
+            if ($asString === stringify($usedAlias)) {
+                return $name;
+            }
+        }
+
+        return null;
     }
 }
