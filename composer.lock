@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "44f031adf1f3a0aa455b933d166604a5",
+    "content-hash": "c4221b33be8acceb544bddc5e919cd9b",
     "packages": [
         {
             "name": "brick/math",
@@ -275,16 +275,16 @@
         },
         {
             "name": "typhoon/type",
-            "version": "dev-alias",
+            "version": "0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typhoon-php/type.git",
-                "reference": "0d248aa771bae8008766b63923916fd283f0c7dd"
+                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typhoon-php/type/zipball/0d248aa771bae8008766b63923916fd283f0c7dd",
-                "reference": "0d248aa771bae8008766b63923916fd283f0c7dd",
+                "url": "https://api.github.com/repos/typhoon-php/type/zipball/a7282d377ad5d3b7eea1adb45b615b88b37d8950",
+                "reference": "a7282d377ad5d3b7eea1adb45b615b88b37d8950",
                 "shasum": ""
             },
             "require": {
@@ -335,7 +335,7 @@
             "description": "Typhoon Type System",
             "support": {
                 "issues": "https://github.com/typhoon-php/type/issues",
-                "source": "https://github.com/typhoon-php/type/tree/alias"
+                "source": "https://github.com/typhoon-php/type/tree/0.6.0"
             },
             "funding": [
                 {
@@ -343,7 +343,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-11-09T06:48:50+00:00"
+            "time": "2025-11-05T17:10:17+00:00"
         }
     ],
     "packages-dev": [
@@ -2414,9 +2414,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "typhoon/type": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
