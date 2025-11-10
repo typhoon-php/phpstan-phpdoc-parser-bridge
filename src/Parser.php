@@ -404,7 +404,7 @@ final class Parser
 
         foreach ($node->templateTypes as $templateNode) {
             $templateFactories[] = Template::factory($templateNode->name, type: $type);
-            $context = $context->template($type);
+            $context = $context->useTemplate($type);
         }
 
         $parser = $this->withContext($context);

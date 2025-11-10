@@ -30,7 +30,7 @@ final class Context
         return $context;
     }
 
-    public function template(TemplateT $template): self
+    public function useTemplate(TemplateT $template): self
     {
         $context = clone $this;
         $context->templates[$template->name] = $template;
